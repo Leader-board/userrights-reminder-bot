@@ -3,7 +3,7 @@ import mysql.connector
 import pandas as pd
 
 def get_users_expiry(wiki_name):
-    cnx = mysql.connector.connect(option_files='/root/replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
+    cnx = mysql.connector.connect(option_files='$HOME/replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
                                   database='meta_p')
     query="""
     SELECT ug.ug_user, u.user_name, ug.ug_group, ug.ug_expiry from user_groups ug
