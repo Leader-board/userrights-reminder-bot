@@ -18,4 +18,4 @@ def get_users_expiry(wiki_name):
     print(res)
     cursor.close()
 
-get_users_expiry('meta_wiki')
+get_users_expiry('metawiki')
