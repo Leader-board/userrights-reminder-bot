@@ -136,5 +136,5 @@ def inform_users(wiki_name, user, group, expiry):
 
 
 
-get_users_expiry('metawiki')
+get_users_expiry('enwiki')
 get_users_expiry_global()
