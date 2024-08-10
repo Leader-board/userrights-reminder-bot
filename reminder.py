@@ -19,7 +19,7 @@ def get_users_expiry_global():
                                   database=f'centralauth_p')
     query="""
     SELECT ug.gug_user, u.gu_name, ug.gug_group, ug.gug_expiry from global_user_groups ug
-    INNER JOIN user u
+    INNER JOIN globaluser u
     ON u.gu_id = ug.gug_user
     WHERE gug_expiry is not null
     AND gug_expiry < NOW() + INTERVAL 2 WEEK
