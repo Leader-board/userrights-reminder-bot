@@ -23,6 +23,7 @@ def get_users_expiry_global():
     ON u.gu_id = ug.gug_user
     WHERE gug_expiry is not null
     AND gug_expiry < NOW() + INTERVAL 2 WEEK
+    AND gug_expiry > NOW()
     """
     cursor = cnx.cursor()
     cursor.execute(query)
@@ -42,6 +43,7 @@ def get_users_expiry(wiki_name):
     ON u.user_id = ug.ug_user
     WHERE ug_expiry is not null
     AND ug_expiry < NOW() + INTERVAL 2 WEEK
+    AND ug_expiry > NOW()
     """
     cursor = cnx.cursor()
     cursor.execute(query)
