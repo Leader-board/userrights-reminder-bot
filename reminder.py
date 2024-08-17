@@ -127,7 +127,7 @@ def inform_users(wiki_name, user, group, expiry):
         "section": "new",
         "token": CSRF_TOKEN,
         "format": "json",
-        "appendtext": f"Hello {user}! Your {group} right will expire on {expiry}!"
+        "appendtext": f"Hello {user}! Your {group} right will expire on {expiry}! Please remember to re-apply for the right if required. ~~~~"
     }
     R = S.post(URL, data=PARAMS_3)
     DATA = R.json()
@@ -138,5 +138,5 @@ def inform_users(wiki_name, user, group, expiry):
 
 
 
-get_users_expiry('enwiki')
+get_users_expiry('commons')
 get_users_expiry_global()
