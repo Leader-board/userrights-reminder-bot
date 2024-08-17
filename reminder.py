@@ -138,5 +138,5 @@ def inform_users(wiki_name, user, group, expiry):
 
 
 
-get_users_expiry('commonswiki')
+get_users_expiry('wikidatawiki')
 get_users_expiry_global()
