@@ -53,6 +53,7 @@ def get_users_expiry(wiki_name):
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     print(res)
     cursor.close()
+    return res
 
 def get_token(wiki_url):
     S = requests.Session()
@@ -118,7 +119,9 @@ def get_wiki_url(wiki_name):
 
 def get_json_dict(page_name):
     # this will ALWAYS be on Meta-Wiki (either production or beta cluster
-    url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page=' + page_name + r'/Mailing+list&prop=wikitext&format=json'
+    #url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page='
+    starting_url = r'https://meta.wikimedia.beta.wmflabs.org/w/api.php?action=parse&formatversion=2&page='
+    url = + page_name + r'/Mailing+list&prop=wikitext&format=json'
     # get the json
     response = urlopen(url)
     data_json = json.loads(response.read())
