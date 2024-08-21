@@ -130,7 +130,7 @@ def get_json_dict(page_name):
     print(f"page name = {page_name}")
     if 'error' in data_json:
         return None # does not exist
-    print(data_json)
+    #print(data_json)
     main_data = json.loads(data_json['parse']['wikitext']) # this is the actual JSON
 
     return main_data
@@ -140,6 +140,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     # get the LOCAL and GLOBAL jsons
     global_data = get_json_dict('T370842/global')
     local_data = get_json_dict(f'T370842/{wiki_name}')
+    print(local_data)
     local_exists = True
     if local_data is None:
         local_exists = False
@@ -161,9 +162,9 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     message_to_send = message_to_send.replace("$2", user_expiry)
 
     if local_exists:
-        title_to_send = local_data['title']
+        title_to_send = local_data['title']['default']
     else:
-        title_to_send = global_data['title']
+        title_to_send = global_data['title']['default']
     # and then we can send!
     inform_users(wiki_name, user_name, title_to_send, message_to_send)
 
@@ -181,7 +182,8 @@ def send_messages(wiki_name):
     users = get_users_expiry(wiki_name)
     # TODO iterrows is a very bad idea so we need to move away from it as soon as possible
     for row in users.itertuples(index=True, name='Pandas'):
-        prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"), row.expiry.decode("utf-8"))
+        if row.username.decode("utf-8") == 'Leaderbot':
+            prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"), row.expiry.decode("utf-8"))
 
 
 
