@@ -121,10 +121,11 @@ def get_json_dict(page_name):
     # this will ALWAYS be on Meta-Wiki (either production or beta cluster
     #url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page='
     starting_url = r'https://meta.wikimedia.beta.wmflabs.org/w/api.php?action=parse&formatversion=2&page='
-    url = starting_url + page_name + r'/Mailing+list&prop=wikitext&format=json'
+    url = starting_url + page_name + r'&prop=wikitext&format=json'
     # get the json
     response = urlopen(url)
     data_json = json.loads(response.read())
+    print(f"page name = {page_name}")
     print(data_json)
     main_data = json.loads(data_json['parse']['wikitext']) # this is the actual JSON
 
