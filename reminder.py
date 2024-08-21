@@ -169,7 +169,7 @@ def send_messages(wiki_name):
     users = get_users_expiry(wiki_name)
     # TODO iterrows is a very bad idea so we need to move away from it as soon as possible
     for row in users.itertuples(index=True, name='Pandas'):
-        prepare_message(wiki_name, row.username, row.userright, row.expiry)
+        prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"), row.expiry)
 
 
 
