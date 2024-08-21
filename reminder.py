@@ -11,8 +11,8 @@ def get_url(wiki_name):
                                   database=f'meta_p')
     cursor = cnx.cursor()
     query = ("""
-    SELECT dbname, lang, family, name, url from wiki WHERE dbname = {}
-    """.format(wiki_name))
+    SELECT dbname, lang, family, name, url from wiki HAVING dbname = {wiki_name}
+    """.format(wiki_name = wiki_name))
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     return res['url'].values[0]
