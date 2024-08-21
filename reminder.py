@@ -128,6 +128,8 @@ def get_json_dict(page_name):
     response = urlopen(url)
     data_json = json.loads(response.read())
     print(f"page name = {page_name}")
+    if 'error' in data_json:
+        return None # does not exist
     print(data_json)
     main_data = json.loads(data_json['parse']['wikitext']) # this is the actual JSON
 
@@ -138,22 +140,30 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     # get the LOCAL and GLOBAL jsons
     global_data = get_json_dict('T370842/global')
     local_data = get_json_dict(f'T370842/{wiki_name}')
+    local_exists = True
+    if local_data == None
+        local_exists = False
     # check if the right is in the global OR local exclusion lists
     global_exclude = global_data['always_excluded_local']
-    local_exclude = local_data['always_excluded']
-    if user_right in global_exclude or user_right in local_exclude:
+    if local_exists:
+        local_exclude = local_data['always_excluded']
+    else:
+        local_exclude = None
+    if user_right in global_exclude or (local_exists and (user_right in local_exclude)):
         return # do NOT proceed
     # then determine the base message to send
     message_to_send = global_data['text']['default']
-    if user_right in local_data['text']:
+    if local_exists and (user_right in local_data['text']):
         message_to_send = local_data['text'][user_right]
 
     # replace the $1 and $2
     message_to_send = message_to_send.replace("$1", user_right)
     message_to_send = message_to_send.replace("$2", user_expiry)
 
-    title_to_send = local_data['title'] # for now assume that local page exists - TODO this
-
+    if local_exists:
+        title_to_send = local_data['title']
+    else:
+        title_to_send = global_data['title']
     # and then we can send!
     inform_users(wiki_name, user_name, title_to_send, message_to_send)
 
