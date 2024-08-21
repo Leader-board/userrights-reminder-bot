@@ -141,7 +141,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     global_data = get_json_dict('T370842/global')
     local_data = get_json_dict(f'T370842/{wiki_name}')
     local_exists = True
-    if local_data == None
+    if local_data is None:
         local_exists = False
     # check if the right is in the global OR local exclusion lists
     global_exclude = global_data['always_excluded_local']
