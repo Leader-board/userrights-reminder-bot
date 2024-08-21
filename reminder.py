@@ -10,9 +10,10 @@ def get_url(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta.analytics.db.svc.wikimedia.cloud',
                                   database=f'meta_p')
     cursor = cnx.cursor()
-    query = ("""
-    SELECT dbname, lang, family, name, url from wiki HAVING dbname = {wiki_name}
-    """.format(wiki_name = wiki_name))
+    # query = ("""
+    # SELECT dbname, lang, family, name, url from wiki WHERE dbname = {wiki_name}
+    # """.format(wiki_name = wiki_name))
+    query = "SELECT dbname, lang, family, name, url from wiki WHERE dbname = testwiki"
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     return res['url'].values[0]
