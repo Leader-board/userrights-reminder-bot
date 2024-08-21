@@ -8,9 +8,9 @@ from urllib.request import urlopen
 
 def get_url(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
-                                  database=f'{wiki_name}_p')
+                                  database=f'meta_p')
     cursor = cnx.cursor()
-    query = ("SELECT dbname, lang, family, name, url from wiki")
+    query = ("SELECT dbname, lang, family, name, url from wiki WHERE dbname = {}".format(wiki_name))
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     return res['url'].values[0]
