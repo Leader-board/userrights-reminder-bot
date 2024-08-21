@@ -157,6 +157,8 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     message_to_send = global_data['text']['default']
     if local_exists and (user_right in local_data['text']):
         message_to_send = local_data['text'][user_right]
+    elif local_exists:
+        message_to_send = local_data['text']['default']
 
     # make user_expiry human-readable
     ts = parser.parse(user_expiry)
