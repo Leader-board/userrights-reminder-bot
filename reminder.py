@@ -1,7 +1,9 @@
 # global bot reminder
 import mysql.connector
 import pandas as pd
-import requests
+import requests, json
+from urllib.request import urlopen
+
 
 
 def get_url(wiki_name):
@@ -30,6 +32,7 @@ def get_users_expiry_global():
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     print(res)
     cursor.close()
+    return res
 
 
 
@@ -38,7 +41,7 @@ def get_users_expiry(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
                                   database=f'{wiki_name}_p')
     query="""
-    SELECT ug.ug_user, u.user_name, ug.ug_group, ug.ug_expiry from user_groups ug
+    SELECT ug.ug_user as userid, u.user_name as username, ug.ug_group as userright, ug.ug_expiry as expiry from user_groups ug
     INNER JOIN user u
     ON u.user_id = ug.ug_user
     WHERE ug_expiry is not null
@@ -113,21 +116,74 @@ def get_wiki_url(wiki_name):
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     return res['url'].values[0]
 
+def get_json_dict(page_name):
+    # this will ALWAYS be on Meta-Wiki (either production or beta cluster
+    url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page=' + page_name + r'/Mailing+list&prop=wikitext&format=json'
+    # get the json
+    response = urlopen(url)
+    data_json = json.loads(response.read())
+    main_data = json.loads(data_json['parse']['wikitext']) # this is the actual JSON
 
-def inform_users(wiki_name, user, group, expiry):
+    return main_data
+
+def prepare_message(wiki_name, user_name, user_right, user_expiry):
+    # we assume that the wiki is in the allowlist
+    # get the LOCAL and GLOBAL jsons
+    global_data = get_json_dict('T370842/global')
+    local_data = get_json_dict(f'T370842/{wiki_name}')
+    # check if the right is in the global OR local exclusion lists
+    global_exclude = global_data['always_excluded_local']
+    local_exclude = local_data['always_excluded']
+    if user_right in global_exclude or user_right in local_exclude:
+        return # do NOT proceed
+    # then determine the base message to send
+    message_to_send = global_data['text']['default']
+    if user_right in local_data['text']:
+        message_to_send = local_data['text'][user_right]
+
+    # replace the $1 and $2
+    message_to_send = message_to_send.replace("$1", user_right)
+    message_to_send = message_to_send.replace("$2", user_expiry)
+
+    title_to_send = local_data['title'] # for now assume that local page exists - TODO this
+
+    # and then we can send!
+    inform_users(wiki_name, user_name, title_to_send, message_to_send)
+
+def get_opt_out():
+    # later on
+    pass
+
+def user_expiry_database_load():
+    # JSON database stored on-wiki
+    # per user: [user_name, user_right, user_expiry]
+    pass
+
+
+def send_messages(wiki_name):
+    users = get_users_expiry(wiki_name)
+    # TODO iterrows is a very bad idea so we need to move away from it as soon as possible
+    for row in users.itertuples(index=True, name='Pandas'):
+        prepare_message(wiki_name, row.username, row.userright, row.expiry)
+
+
+
+
+def inform_users(wiki_name, user, title, message):
     # inform users that their user right will expire soon
     # find the user talk page
     wiki_url = get_url(wiki_name)
-    CSRF_TOKEN, URL, S, api_link = get_token(wiki_name)
+    CSRF_TOKEN, URL, S, api_link = get_token(wiki_url)
     # we need to create a new section on that user
     # Step 4: POST request to edit a page
     PARAMS_3 = {
         "action": "edit",
         "title": f"User talk:{user}",
         "section": "new",
+        "sectiontitle": title,
         "token": CSRF_TOKEN,
         "format": "json",
-        "appendtext": f"Hello {user}! Your {group} right will expire on {expiry}! Please remember to re-apply for the right if required. ~~~~"
+        "appendtext": message
     }
     R = S.post(URL, data=PARAMS_3)
     DATA = R.json()
@@ -138,5 +194,6 @@ def inform_users(wiki_name, user, group, expiry):
 
 
 
-get_users_expiry('wikifunctionswiki')
+#get_users_expiry('wikifunctionswiki')
+send_messages('testwiki')
 get_users_expiry_global()
