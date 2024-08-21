@@ -7,7 +7,7 @@ from urllib.request import urlopen
 
 
 def get_url(wiki_name):
-    cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta_p.analytics.db.svc.wikimedia.cloud',
+    cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta.analytics.db.svc.wikimedia.cloud',
                                   database=f'meta_p')
     cursor = cnx.cursor()
     query = ("SELECT dbname, lang, family, name, url from wiki WHERE dbname = {}".format(wiki_name))
