@@ -125,6 +125,7 @@ def get_json_dict(page_name):
     # get the json
     response = urlopen(url)
     data_json = json.loads(response.read())
+    print(data_json)
     main_data = json.loads(data_json['parse']['wikitext']) # this is the actual JSON
 
     return main_data
