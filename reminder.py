@@ -3,6 +3,7 @@ import mysql.connector
 import pandas as pd
 import requests, json
 from urllib.request import urlopen
+from dateutil import parser
 
 
 
@@ -26,7 +27,7 @@ def get_users_expiry_global():
     INNER JOIN globaluser u
     ON u.gu_id = ug.gug_user
     WHERE gug_expiry is not null
-    AND gug_expiry < NOW() + INTERVAL 2 WEEK
+    AND gug_expiry < NOW() + INTERVAL 1 WEEK
     AND gug_expiry > NOW()
     """
     cursor = cnx.cursor()
@@ -47,7 +48,7 @@ def get_users_expiry(wiki_name):
     INNER JOIN user u
     ON u.user_id = ug.ug_user
     WHERE ug_expiry is not null
-    AND ug_expiry < NOW() + INTERVAL 2 WEEK
+    AND ug_expiry < NOW() + INTERVAL 1 WEEK
     AND ug_expiry > NOW()
     """
     cursor = cnx.cursor()
@@ -157,14 +158,20 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     if local_exists and (user_right in local_data['text']):
         message_to_send = local_data['text'][user_right]
 
+    # make user_expiry human-readable
+    ts = parser.parse(user_expiry)
+    expiry_fmt = ts.strftime('%Y-%m-%d %H:%M:%S')
+
     # replace the $1 and $2
     message_to_send = message_to_send.replace("$1", user_right)
-    message_to_send = message_to_send.replace("$2", user_expiry)
+    message_to_send = message_to_send.replace("$2", expiry_fmt)
 
     if local_exists:
         title_to_send = local_data['title']['default']
     else:
         title_to_send = global_data['title']['default']
+
+    title_to_send = title_to_send.replace("$1", user_right)
     # and then we can send!
     inform_users(wiki_name, user_name, title_to_send, message_to_send)
 
