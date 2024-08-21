@@ -60,7 +60,7 @@ def get_users_expiry(wiki_name):
 def get_token(wiki_url):
     S = requests.Session()
 
-    f = open("../../botdetails.txt", "r")
+    f = open("../botdetails.txt", "r")
     filecont = f.read().splitlines()
     f.close()
     if len(filecont) != 5:
