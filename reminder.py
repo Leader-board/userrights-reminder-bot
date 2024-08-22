@@ -225,7 +225,7 @@ def user_expiry_database_load():
 def user_expiry_database_save(db):
     r = json.dumps(db)
     # save that to db
-    wiki_url = 'https://meta.wikimedia.beta.wmflabs.org/w/api.php'
+    wiki_url = 'https://meta.wikimedia.beta.wmflabs.org'
     CSRF_TOKEN, URL, S, api_link = get_token(wiki_url)
     PARAMS_3 = {
         "action": "edit",
