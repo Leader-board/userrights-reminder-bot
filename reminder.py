@@ -134,10 +134,11 @@ def get_json_dict(page_name, wiki_link = r'https://meta.wikimedia.org'):
     # get the json
     response = urlopen(url)
     data_json = json.loads(response.read())
-   # print(f"page name = {page_name}")
+    data_json = data_json.replace("\'", "\"") # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
+    # print(f"page name = {page_name}")
     if 'error' in data_json:
         return None # does not exist
-    print(data_json)
+    #print(data_json)
     main_data = json.loads(data_json['parse']['wikitext']) # this is the actual JSON
 
     return main_data
