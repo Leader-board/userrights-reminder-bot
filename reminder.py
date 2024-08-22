@@ -42,6 +42,7 @@ def get_users_expiry_global():
 def get_wiki_usergroup(mw_name, wiki_name):
     # to map, for instance, Wikiversity's sysop (which is actually called curator)
     val = get_json_dict(f'MediaWiki:Group-{mw_name}', get_url(wiki_name))
+    print(val)
     return val # this is a string
 
 
