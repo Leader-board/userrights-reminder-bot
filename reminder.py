@@ -142,7 +142,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     global_data = get_json_dict('T370842/global')
     local_data = get_json_dict(f'T370842/{wiki_name}')
 
-    local_database = get_json_dict()
+    local_database = get_json_dict('T370842/database')
     if wiki_name not in local_database:
         pass
     elif user_expiry not in local_database[wiki_name]:
