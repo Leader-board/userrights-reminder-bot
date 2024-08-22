@@ -218,7 +218,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
 
 def get_opt_out():
     # later on
-    ll = get_json_dict('Global reminder bot/Exclusion')
+    ll = get_json_dict('Global_reminder_bot/Exclusion')
     excluded_users = []
     for d in ll:
         excluded_users.append(re.split('[:\/]', d['title'])[1])
