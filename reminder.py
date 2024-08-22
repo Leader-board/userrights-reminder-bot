@@ -1,4 +1,6 @@
 # global bot reminder
+import re
+
 import mysql.connector
 import pandas as pd
 import requests, json
@@ -123,7 +125,7 @@ def get_wiki_url(wiki_name):
 def get_json_dict(page_name):
     # this will ALWAYS be on Meta-Wiki (either production or beta cluster
     #url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page='
-    starting_url = r'https://meta.wikimedia.beta.wmflabs.org/w/api.php?action=parse&formatversion=2&page='
+    starting_url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page='
     url = starting_url + page_name + r'&prop=wikitext&format=json'
     # get the json
     response = urlopen(url)
@@ -139,12 +141,14 @@ def get_json_dict(page_name):
 def prepare_message(wiki_name, user_name, user_right, user_expiry):
     # we assume that the wiki is in the allowlist
     # get the LOCAL and GLOBAL jsons
-    global_data = get_json_dict('T370842/global')
-    local_data = get_json_dict(f'T370842/{wiki_name}')
+    global_data = get_json_dict('Global_reminder_bot/global')
+    local_data = get_json_dict(f'Global_reminder_bot/{wiki_name}')
 
-    local_database = get_json_dict('T370842/database')
+    local_database = get_json_dict('Global_reminder_bot/database')
     if wiki_name not in local_database:
         pass
+    elif user_name in get_opt_out():
+        return # user has chosen to exclude themselves
     elif user_expiry not in local_database[wiki_name]:
         pass
     else:
@@ -214,22 +218,27 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
 
 def get_opt_out():
     # later on
-    pass
+    ll = get_json_dict('Global reminder bot/Exclusion')
+    excluded_users = []
+    for d in ll:
+        excluded_users.append(re.split('[:\/]', d['title'])[1])
+
+    return excluded_users
 
 def user_expiry_database_load():
     # JSON database stored on-wiki
     # [wiki] -> [{expiry_date -> [{user, user_right}]]
-    db = get_json_dict('T370842/database')
+    db = get_json_dict('Global_reminder_bot/database')
     return db
 
 def user_expiry_database_save(db):
     r = json.dumps(db)
     # save that to db
-    wiki_url = 'https://meta.wikimedia.beta.wmflabs.org'
+    wiki_url = 'https://meta.wikimedia.org'
     CSRF_TOKEN, URL, S, api_link = get_token(wiki_url)
     PARAMS_3 = {
         "action": "edit",
-        "title": "T370842/database",
+        "title": "Global reminder bot/database",
         "contentmodel": "json",
         "token": CSRF_TOKEN,
         "format": "json",
