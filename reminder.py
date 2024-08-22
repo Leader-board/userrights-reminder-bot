@@ -205,7 +205,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
         local_database[wiki_name][user_expiry] = []
 
     ll = local_database[wiki_name][user_expiry]
-    ll.add([user_name, user_right])
+    ll.append([user_name, user_right])
     local_database[wiki_name][user_expiry] = ll
 
     # convert that to json and put it back
