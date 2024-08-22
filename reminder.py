@@ -141,6 +141,27 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     # get the LOCAL and GLOBAL jsons
     global_data = get_json_dict('T370842/global')
     local_data = get_json_dict(f'T370842/{wiki_name}')
+
+    local_database = get_json_dict()
+    if wiki_name not in local_database:
+        pass
+    elif user_expiry not in local_database[wiki_name]:
+        pass
+    else:
+        # get the list
+        ll = local_database[wiki_name][user_expiry]
+        # reminder: [user_name, user_right]
+        exists = False
+        for det in ll:
+            if (det[0] == user_name and det[1] == user_right):
+                # we found it
+                exists = True
+                break
+
+        if exists:
+            # do not process this - already in database
+            return
+
     print(local_data)
     local_exists = True
     if local_data is None:
@@ -177,14 +198,47 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     # and then we can send!
     inform_users(wiki_name, user_name, title_to_send, message_to_send)
 
+    # after sending, add its entry in database
+    if wiki_name not in local_database:
+        local_database[wiki_name] = {}
+    if user_expiry not in local_database[wiki_name]:
+        local_database[wiki_name][user_expiry] = []
+
+    ll = local_database[wiki_name][user_expiry]
+    ll.add([user_name, user_right])
+    local_database[wiki_name][user_expiry] = ll
+
+    # convert that to json and put it back
+
+    user_expiry_database_save(local_database)
+
 def get_opt_out():
     # later on
     pass
 
 def user_expiry_database_load():
     # JSON database stored on-wiki
-    # per user: [user_name, user_right, user_expiry]
-    pass
+    # [wiki] -> [{expiry_date -> [{user, user_right}]]
+    db = get_json_dict('T370842/database')
+    return db
+
+def user_expiry_database_save(db):
+    r = json.dumps(db)
+    # save that to db
+    wiki_url = 'https://meta.wikimedia.beta.wmflabs.org/w/api.php'
+    CSRF_TOKEN, URL, S, api_link = get_token(wiki_url)
+    PARAMS_3 = {
+        "action": "edit",
+        "title": "T370842/database",
+        "contentmodel": "json",
+        "token": CSRF_TOKEN,
+        "format": "json",
+        "text": r
+    }
+    R = S.post(URL, data=PARAMS_3)
+    DATA = R.json()
+
+    print(DATA)
 
 
 def send_messages(wiki_name):
