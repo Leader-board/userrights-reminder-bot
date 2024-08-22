@@ -236,6 +236,7 @@ def user_expiry_database_save(db):
         "text": r
     }
     R = S.post(URL, data=PARAMS_3)
+    print(R)
     DATA = R.json()
 
     print(DATA)
