@@ -262,7 +262,7 @@ def send_messages(wiki_name):
     # TODO iterrows is a very bad idea so we need to move away from it as soon as possible
     for row in users.itertuples(index=True, name='Pandas'):
         # IMPORTANT: only Leaderbot works on testwiki!
-        if row.wiki_name.decode("utf-8") != 'testwiki' or row.username.decode("utf-8") == 'Leaderbot':
+        if wiki_name != 'testwiki' or row.username.decode("utf-8") == 'Leaderbot':
             prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"), row.expiry.decode("utf-8"))
 
 
