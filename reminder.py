@@ -39,7 +39,10 @@ def get_users_expiry_global():
     cursor.close()
     return res
 
-
+def get_wiki_usergroup(mw_name, wiki_name):
+    # to map, for instance, Wikiversity's sysop (which is actually called curator)
+    val = get_json_dict(f'MediaWiki:Group-{mw_name}', get_url(wiki_name))
+    return val # this is a string
 
 
 def get_users_expiry(wiki_name):
@@ -122,10 +125,10 @@ def get_wiki_url(wiki_name):
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     return res['url'].values[0]
 
-def get_json_dict(page_name):
+def get_json_dict(page_name, wiki_link = r'https://meta.wikimedia.org'):
     # this will ALWAYS be on Meta-Wiki (either production or beta cluster
     #url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page='
-    starting_url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page='
+    starting_url = wiki_link + r'/w/api.php?action=parse&formatversion=2&page='
     url = starting_url + page_name + r'&prop=wikitext&format=json'
     # get the json
     response = urlopen(url)
@@ -189,9 +192,10 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     ts = parser.parse(user_expiry)
     expiry_fmt = ts.strftime('%Y-%m-%d %H:%M:%S')
 
-    # replace the $1 and $2
+    # replace the $n
     message_to_send = message_to_send.replace("$1", user_right)
-    message_to_send = message_to_send.replace("$2", expiry_fmt)
+    message_to_send = message_to_send.replace("$2", get_wiki_usergroup(user_right, wiki_name))
+    message_to_send = message_to_send.replace("$3", expiry_fmt)
 
     if local_exists:
         title_to_send = local_data['title']['default']
@@ -289,5 +293,5 @@ def inform_users(wiki_name, user, title, message):
 
 
 #get_users_expiry('wikifunctionswiki')
-send_messages('wikifunctionswiki')
+send_messages('testwiki')
 get_users_expiry_global()
