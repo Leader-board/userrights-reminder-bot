@@ -221,6 +221,7 @@ def get_opt_out():
     ll = get_json_dict('Global_reminder_bot/Exclusion')
     excluded_users = []
     for d in ll:
+        print(d)
         excluded_users.append(re.split('[:\/]', d['title'])[1])
 
     return excluded_users
