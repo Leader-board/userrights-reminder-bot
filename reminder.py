@@ -140,10 +140,10 @@ def get_json_dict(page_name, wiki_link = r'https://meta.wikimedia.org'):
     # print(f"page name = {page_name}")
     if 'error' in data_json:
         return None # does not exist
-    print(data_json)
-    print(data_json['parse']['wikitext'])
-    main_data = data_json['parse']['wikitext'] # this is the actual JSON
-
+    try:
+        main_data = json.loads(data_json['parse']['wikitext']) # this is the actual JSON
+    except ValueError as e:
+        main_data = data_json['parse']['wikitext'] # not JSON
     return main_data
 
 def prepare_message(wiki_name, user_name, user_right, user_expiry):
