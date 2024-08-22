@@ -302,5 +302,13 @@ def inform_users(wiki_name, user, title, message):
 
 
 #get_users_expiry('wikifunctionswiki')
-send_messages('testwiki')
+
+
+# wikis to run
+send_messages('wikifunctionswiki')
+send_messages('metawiki')
+send_messages('mediawikiwiki')
+send_messages('incubatorwiki')
+send_messages('enwikibooks')
+
 get_users_expiry_global()
