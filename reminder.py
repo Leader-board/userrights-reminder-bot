@@ -261,8 +261,9 @@ def send_messages(wiki_name):
     users = get_users_expiry(wiki_name)
     # TODO iterrows is a very bad idea so we need to move away from it as soon as possible
     for row in users.itertuples(index=True, name='Pandas'):
-        #row.username.decode("utf-8") == 'Leaderbot':
-        prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"), row.expiry.decode("utf-8"))
+        # IMPORTANT: only Leaderbot works on testwiki!
+        if row.wiki_name.decode("utf-8") is not 'testwiki' or row.username.decode("utf-8") == 'Leaderbot':
+            prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"), row.expiry.decode("utf-8"))
 
 
 
