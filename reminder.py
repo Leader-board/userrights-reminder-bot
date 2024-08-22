@@ -289,5 +289,5 @@ def inform_users(wiki_name, user, title, message):
 
 
 #get_users_expiry('wikifunctionswiki')
-send_messages('testwiki')
+send_messages('wikifunctionswiki')
 get_users_expiry_global()
