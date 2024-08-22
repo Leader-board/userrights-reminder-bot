@@ -145,10 +145,10 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     local_data = get_json_dict(f'Global_reminder_bot/{wiki_name}')
 
     local_database = get_json_dict('Global_reminder_bot/database')
-    if wiki_name not in local_database:
-        pass
-    elif user_name in get_opt_out():
+    if user_name in get_opt_out():
         return # user has chosen to exclude themselves
+    elif wiki_name not in local_database:
+        pass
     elif user_expiry not in local_database[wiki_name]:
         pass
     else:
