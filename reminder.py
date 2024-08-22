@@ -130,11 +130,11 @@ def get_json_dict(page_name, wiki_link = r'https://meta.wikimedia.org'):
     #url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page='
     starting_url = wiki_link + r'/w/api.php?action=parse&formatversion=2&page='
     url = starting_url + page_name + r'&prop=wikitext&format=json'
-    print(url)
+#    print(url)
     # get the json
     response = urlopen(url)
     data_json = json.loads(response.read())
-    print(f"page name = {page_name}")
+   # print(f"page name = {page_name}")
     if 'error' in data_json:
         return None # does not exist
     #print(data_json)
@@ -193,9 +193,12 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     ts = parser.parse(user_expiry)
     expiry_fmt = ts.strftime('%Y-%m-%d %H:%M:%S')
 
-    # replace the $n
+    # replace the $n where applicable
     message_to_send = message_to_send.replace("$1", user_right)
-    message_to_send = message_to_send.replace("$2", get_wiki_usergroup(user_right, wiki_name))
+    if get_wiki_usergroup(user_right, wiki_name) is not None:
+        message_to_send = message_to_send.replace("$2", get_wiki_usergroup(user_right, wiki_name))
+    else:
+        message_to_send = message_to_send.replace("($2)", '')
     message_to_send = message_to_send.replace("$3", expiry_fmt)
 
     if local_exists:
