@@ -306,9 +306,12 @@ def inform_users(wiki_name, user, title, message):
 
 # wikis to run
 send_messages('wikifunctionswiki')
-send_messages('metawiki')
-send_messages('mediawikiwiki')
-send_messages('incubatorwiki')
 send_messages('enwikibooks')
+send_messages('frwiki')
+
+# send_messages('metawiki')
+# send_messages('mediawikiwiki')
+# send_messages('incubatorwiki')
+# send_messages('enwikibooks')
 
 get_users_expiry_global()
