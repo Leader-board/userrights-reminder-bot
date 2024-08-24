@@ -150,7 +150,10 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     # we assume that the wiki is in the allowlist
     # get the LOCAL and GLOBAL jsons
     global_data = get_json_dict('Global_reminder_bot/global')
-    local_data = get_json_dict(f'Global_reminder_bot/{wiki_name}')
+    if wiki_name != 'global':
+        local_data = get_json_dict(f'Global_reminder_bot/{wiki_name}')
+    else
+        local_data = None # does not apply for global rights
 
     local_database = get_json_dict('Global_reminder_bot/database')
     if user_name in get_opt_out():
@@ -180,18 +183,22 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
         local_exists = False
     # check if the right is in the global OR local exclusion lists
     global_exclude = global_data['always_excluded_local']
+    global_rights_exclude = global_data['always_excluded_global']
     if local_exists:
         local_exclude = local_data['always_excluded']
     else:
         local_exclude = None
-    if user_right in global_exclude or (local_exists and (user_right in local_exclude)):
+    if (wiki_name != 'global' and user_right in global_exclude) or (local_exists and (user_right in local_exclude)) or (wiki_name == 'global' and user_right in global_rights_exclude):
         return # do NOT proceed
     # then determine the base message to send
-    message_to_send = global_data['text']['default']
-    if local_exists and (user_right in local_data['text']):
-        message_to_send = local_data['text'][user_right]
-    elif local_exists:
-        message_to_send = local_data['text']['default']
+    if wiki_name != 'global':
+        message_to_send = global_data['text']['default']
+        if local_exists and (user_right in local_data['text']):
+            message_to_send = local_data['text'][user_right]
+        elif local_exists:
+            message_to_send = local_data['text']['default']
+    else:
+        message_to_send = global_data['text']['default_global']
 
     # make user_expiry human-readable
     ts = parser.parse(user_expiry)
@@ -205,7 +212,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
         message_to_send = message_to_send.replace("($2)", '')
     message_to_send = message_to_send.replace("$3", expiry_fmt)
 
-    if local_exists:
+    if local_exists and wiki_name != 'global':
         title_to_send = local_data['title']['default']
     else:
         title_to_send = global_data['title']['default']
@@ -267,10 +274,9 @@ def user_expiry_database_save(db):
 
 def send_messages(wiki_name):
     users = get_users_expiry(wiki_name)
-    # TODO iterrows is a very bad idea so we need to move away from it as soon as possible
     for row in users.itertuples(index=True, name='Pandas'):
         # IMPORTANT: only Leaderbot works on testwiki!
-        if wiki_name != 'testwiki' or row.username.decode("utf-8") == 'Leaderbot':
+        if (wiki_name != 'testwiki' and wiki_name != 'global') or row.username.decode("utf-8") == 'Leaderbot':
             prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"), row.expiry.decode("utf-8"))
 
 
@@ -279,7 +285,10 @@ def send_messages(wiki_name):
 def inform_users(wiki_name, user, title, message):
     # inform users that their user right will expire soon
     # find the user talk page
-    wiki_url = get_url(wiki_name)
+    if wiki_name != 'global':
+        wiki_url = get_url(wiki_name)
+    else:
+        wiki_url = get_url('metawiki')
     CSRF_TOKEN, URL, S, api_link = get_token(wiki_url)
     # we need to create a new section on that user
     # Step 4: POST request to edit a page
@@ -305,9 +314,11 @@ def inform_users(wiki_name, user, title, message):
 
 
 # wikis to run
-send_messages('wikifunctionswiki')
-send_messages('enwikibooks')
-send_messages('frwiki')
+# send_messages('wikifunctionswiki')
+# send_messages('enwikibooks')
+# send_messages('frwiki')
+
+send_messages('global')
 
 # send_messages('metawiki')
 # send_messages('mediawikiwiki')
