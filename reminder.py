@@ -27,7 +27,7 @@ def get_users_expiry_global():
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'centralauth.analytics.db.svc.wikimedia.cloud',
                                   database=f'centralauth_p')
     query="""
-    SELECT ug.gug_user, u.gu_name, ug.gug_group, ug.gug_expiry from global_user_groups ug
+    SELECT ug.gug_user as userid, u.gu_name as username, ug.gug_group as userright, ug.gug_expiry as expiry from global_user_groups ug
     INNER JOIN globaluser u
     ON u.gu_id = ug.gug_user
     WHERE gug_expiry is not null
@@ -273,7 +273,11 @@ def user_expiry_database_save(db):
 
 
 def send_messages(wiki_name):
-    users = get_users_expiry(wiki_name)
+    if wiki_name != global:
+        users = get_users_expiry(wiki_name)
+    else:
+        users = get_users_expiry_global()
+
     for row in users.itertuples(index=True, name='Pandas'):
         # IMPORTANT: only Leaderbot works on testwiki!
         if (wiki_name != 'testwiki' and wiki_name != 'global') or row.username.decode("utf-8") == 'Leaderbot':
