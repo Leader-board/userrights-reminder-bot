@@ -318,12 +318,12 @@ def inform_users(wiki_name, user, title, message):
 
 
 # wikis to run
-send_messages('wikifunctionswiki')
-send_messages('enwikibooks')
-send_messages('frwiki')
-send_messages('eswiki')
+# send_messages('wikifunctionswiki')
+# send_messages('enwikibooks')
+# send_messages('frwiki')
+# send_messages('eswiki')
 
-#send_messages('global')
+send_messages('global')
 
 # send_messages('metawiki')
 # send_messages('mediawikiwiki')
