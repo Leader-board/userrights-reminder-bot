@@ -152,7 +152,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     global_data = get_json_dict('Global_reminder_bot/global')
     if wiki_name != 'global':
         local_data = get_json_dict(f'Global_reminder_bot/{wiki_name}')
-    else
+    else:
         local_data = None # does not apply for global rights
 
     local_database = get_json_dict('Global_reminder_bot/database')
