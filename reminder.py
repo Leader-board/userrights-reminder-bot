@@ -273,7 +273,7 @@ def user_expiry_database_save(db):
 
 
 def send_messages(wiki_name):
-    if wiki_name != global:
+    if wiki_name != 'global':
         users = get_users_expiry(wiki_name)
     else:
         users = get_users_expiry_global()
