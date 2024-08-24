@@ -206,7 +206,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
 
     # replace the $n where applicable
     message_to_send = message_to_send.replace("$1", user_right)
-    if get_wiki_usergroup(user_right, wiki_name) is not None:
+    if wiki_name != 'global' and get_wiki_usergroup(user_right, wiki_name) is not None:
         message_to_send = message_to_send.replace("$2", get_wiki_usergroup(user_right, wiki_name))
     else:
         message_to_send = message_to_send.replace("($2)", '')
