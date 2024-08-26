@@ -322,6 +322,7 @@ send_messages('wikifunctionswiki')
 send_messages('enwikibooks')
 send_messages('frwiki')
 send_messages('eswiki')
+send_messages('wikimaniawiki')
 
 # send_messages('global')
 
