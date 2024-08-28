@@ -280,7 +280,7 @@ def send_messages(wiki_name):
 
     for row in users.itertuples(index=True, name='Pandas'):
         # IMPORTANT: only Leaderbot works on testwiki!
-        if (wiki_name != 'testwiki' and wiki_name != 'global') or row.username.decode("utf-8") == 'Leaderbot':
+        if (wiki_name != 'testwiki' and wiki_name != 'global') or row.username.decode("utf-8") == 'Leaderbot' and 'WMF' not in row.username.decode("utf-8"):
             prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"), row.expiry.decode("utf-8"))
 
 
