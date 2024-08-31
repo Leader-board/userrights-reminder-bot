@@ -219,8 +219,10 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
 
     title_to_send = title_to_send.replace("$1", user_right)
     # and then we can send!
-    inform_users(wiki_name, user_name, title_to_send, message_to_send)
-
+    status = inform_users(wiki_name, user_name, title_to_send, message_to_send)
+    if not status:
+        print("Error detected")
+        return # do not add in database
     # after sending, add its entry in database
     if wiki_name not in local_database:
         local_database[wiki_name] = {}
@@ -266,10 +268,10 @@ def user_expiry_database_save(db):
         "text": r
     }
     R = S.post(URL, data=PARAMS_3)
-    print(R.content)
+    #print(R.content)
     DATA = R.json()
 
-    print(DATA)
+    #print(DATA)
 
 
 def send_messages(wiki_name):
@@ -309,6 +311,10 @@ def inform_users(wiki_name, user, title, message):
     DATA = R.json()
 
     print(DATA)
+    if 'error' in DATA:
+        return False # do not proceed - probably ratelimit issue
+    else:
+        return True
 
 
 
