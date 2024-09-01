@@ -265,7 +265,7 @@ def user_expiry_database_load():
 
 def run_approved_wikis():
     # get the list
-    ls = global_data = get_json_dict('Global_reminder_bot/global')['approved_wikis'] # this is an array
+    ls = get_json_dict('Global_reminder_bot/global')['approved_wikis'] # this is an array
     for wiki_name in ls:
         send_messages(wiki_name)
 
@@ -353,4 +353,4 @@ def inform_users(wiki_name, user, title, message):
 # send_messages('incubatorwiki')
 # send_messages('enwikibooks')
 
-get_users_expiry_global()
+run_approved_wikis()
