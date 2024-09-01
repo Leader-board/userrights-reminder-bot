@@ -249,9 +249,9 @@ def get_opt_out():
     excluded_users = []
     # print(ll)
     for d in ll:
-        print(d)
+        print(d['title'])
         # must be in User namespace - ignore if not
-        if '[[User:' in d:
+        if 'User:' in d['title']:
             excluded_users.append(re.split('[:\/]', d['title'])[1])
     return excluded_users
 
