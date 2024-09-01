@@ -9,24 +9,23 @@ from dateutil import parser
 import ast
 
 
-
-
 def get_url(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta.analytics.db.svc.wikimedia.cloud',
                                   database=f'meta_p')
     cursor = cnx.cursor()
     query = ("""
     SELECT dbname, lang, family, name, url from wiki WHERE dbname = '{wiki_name}'
-    """.format(wiki_name = wiki_name))
+    """.format(wiki_name=wiki_name))
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     return res['url'].values[0]
+
 
 def get_users_expiry_global():
     # uses a different table
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'centralauth.analytics.db.svc.wikimedia.cloud',
                                   database=f'centralauth_p')
-    query="""
+    query = """
     SELECT ug.gug_user as userid, u.gu_name as username, ug.gug_group as userright, ug.gug_expiry as expiry from global_user_groups ug
     INNER JOIN globaluser u
     ON u.gu_id = ug.gug_user
@@ -41,16 +40,17 @@ def get_users_expiry_global():
     cursor.close()
     return res
 
+
 def get_wiki_usergroup(mw_name, wiki_name):
     # to map, for instance, Wikiversity's sysop (which is actually called curator)
     val = get_json_dict(f'MediaWiki:Group-{mw_name}', get_url(wiki_name))
-    return val # this is a string
+    return val  # this is a string
 
 
 def get_users_expiry(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
                                   database=f'{wiki_name}_p')
-    query="""
+    query = """
     SELECT ug.ug_user as userid, u.user_name as username, ug.ug_group as userright, ug.ug_expiry as expiry from user_groups ug
     INNER JOIN user u
     ON u.user_id = ug.ug_user
@@ -64,6 +64,7 @@ def get_users_expiry(wiki_name):
     print(res)
     cursor.close()
     return res
+
 
 def get_token(wiki_url):
     S = requests.Session()
@@ -115,6 +116,7 @@ def get_token(wiki_url):
 
     return CSRF_TOKEN, URL, S, filecont[4]
 
+
 def get_wiki_url(wiki_name):
     cnx = mysql.connector.connect(option_files='/root/replica.my.cnf', host='meta.analytics.db.svc.wikimedia.cloud',
                                   database='meta_p')
@@ -127,24 +129,26 @@ def get_wiki_url(wiki_name):
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     return res['url'].values[0]
 
-def get_json_dict(page_name, wiki_link = r'https://meta.wikimedia.org'):
+
+def get_json_dict(page_name, wiki_link=r'https://meta.wikimedia.org'):
     # this will ALWAYS be on Meta-Wiki (either production or beta cluster
-    #url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page='
+    # url = r'https://meta.wikimedia.org/w/api.php?action=parse&formatversion=2&page='
     starting_url = wiki_link + r'/w/api.php?action=parse&formatversion=2&page='
     url = starting_url + page_name + r'&prop=wikitext&format=json'
-#    print(url)
+    #    print(url)
     # get the json
     response = urlopen(url)
     # https://stackoverflow.com/questions/39491420/python-jsonexpecting-property-name-enclosed-in-double-quotes
     data_json = json.loads(response.read())
     # print(f"page name = {page_name}")
     if 'error' in data_json:
-        return None # does not exist
+        return None  # does not exist
     try:
-        main_data = json.loads(data_json['parse']['wikitext']) # this is the actual JSON
+        main_data = json.loads(data_json['parse']['wikitext'])  # this is the actual JSON
     except ValueError as e:
-        main_data = data_json['parse']['wikitext'] # not JSON
+        main_data = data_json['parse']['wikitext']  # not JSON
     return main_data
+
 
 def prepare_message(wiki_name, user_name, user_right, user_expiry):
     # we assume that the wiki is in the allowlist
@@ -153,11 +157,11 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     if wiki_name != 'global':
         local_data = get_json_dict(f'Global_reminder_bot/{wiki_name}')
     else:
-        local_data = None # does not apply for global rights
+        local_data = None  # does not apply for global rights
 
     local_database = get_json_dict('Global_reminder_bot/database')
     if user_name in get_opt_out():
-        return # user has chosen to exclude themselves
+        return  # user has chosen to exclude themselves
     elif wiki_name not in local_database:
         pass
     elif user_expiry not in local_database[wiki_name]:
@@ -188,8 +192,9 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
         local_exclude = local_data['always_excluded']
     else:
         local_exclude = None
-    if (wiki_name != 'global' and user_right in global_exclude) or (local_exists and (user_right in local_exclude)) or (wiki_name == 'global' and user_right in global_rights_exclude):
-        return # do NOT proceed
+    if (wiki_name != 'global' and user_right in global_exclude) or (local_exists and (user_right in local_exclude)) or (
+            wiki_name == 'global' and user_right in global_rights_exclude):
+        return  # do NOT proceed
     # then determine the base message to send
     if wiki_name != 'global':
         message_to_send = global_data['text']['default']
@@ -222,7 +227,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
     status = inform_users(wiki_name, user_name, title_to_send, message_to_send)
     if not status:
         print("Error detected")
-        return # do not add in database
+        return  # do not add in database
     # after sending, add its entry in database
     if wiki_name not in local_database:
         local_database[wiki_name] = {}
@@ -237,22 +242,34 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
 
     user_expiry_database_save(local_database)
 
+
 def get_opt_out():
     # later on
     ll = get_json_dict('Global_reminder_bot/Exclusion')['targets']
     excluded_users = []
-    #print(ll)
+    # print(ll)
     for d in ll:
-       # print(d)
-        excluded_users.append(re.split('[:\/]', d['title'])[1])
-
+        print(d)
+        # must be in User namespace - ignore if not
+        if '[[User:' in d:
+            excluded_users.append(re.split('[:\/]', d['title'])[1])
     return excluded_users
+
 
 def user_expiry_database_load():
     # JSON database stored on-wiki
     # [wiki] -> [{expiry_date -> [{user, user_right}]]
     db = get_json_dict('Global_reminder_bot/database')
     return db
+
+
+def run_approved_wikis():
+    # get the list
+    ls = global_data = get_json_dict('Global_reminder_bot/global')['approved_wikis'] # this is an array
+    for wiki_name in ls:
+        send_messages(wiki_name)
+
+
 
 def user_expiry_database_save(db):
     r = json.dumps(db)
@@ -268,10 +285,10 @@ def user_expiry_database_save(db):
         "text": r
     }
     R = S.post(URL, data=PARAMS_3)
-    #print(R.content)
+    # print(R.content)
     DATA = R.json()
 
-    #print(DATA)
+    # print(DATA)
 
 
 def send_messages(wiki_name):
@@ -282,10 +299,10 @@ def send_messages(wiki_name):
 
     for row in users.itertuples(index=True, name='Pandas'):
         # IMPORTANT: only Leaderbot works on testwiki!
-        if (wiki_name != 'testwiki' and wiki_name != 'global') or row.username.decode("utf-8") == 'Leaderbot' and 'WMF' not in row.username.decode("utf-8"):
-            prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"), row.expiry.decode("utf-8"))
-
-
+        if (wiki_name != 'testwiki') or row.username.decode(
+                "utf-8") == 'Leaderbot' and 'WMF' not in row.username.decode("utf-8"):
+            prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"),
+                            row.expiry.decode("utf-8"))
 
 
 def inform_users(wiki_name, user, title, message):
@@ -312,25 +329,22 @@ def inform_users(wiki_name, user, title, message):
 
     print(DATA)
     if 'error' in DATA:
-        return False # do not proceed - probably ratelimit issue
+        return False  # do not proceed - probably ratelimit issue
     else:
         return True
 
 
-
-
-
-#get_users_expiry('wikifunctionswiki')
+# get_users_expiry('wikifunctionswiki')
 
 
 # wikis to run
-send_messages('wikifunctionswiki')
-send_messages('enwikibooks')
-send_messages('frwiki')
-send_messages('eswiki')
-send_messages('wikimaniawiki')
-send_messages('enwikivoyage')
-send_messages('enwiki')
+# send_messages('wikifunctionswiki')
+# send_messages('enwikibooks')
+# send_messages('frwiki')
+# send_messages('eswiki')
+# send_messages('wikimaniawiki')
+# send_messages('enwikivoyage')
+# send_messages('enwiki')
 
 # send_messages('global')
 
