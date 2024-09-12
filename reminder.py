@@ -280,6 +280,7 @@ def user_expiry_database_save(db):
         "action": "edit",
         "title": "Global reminder bot/database",
         "contentmodel": "json",
+        "bot": "yes",
         "token": CSRF_TOKEN,
         "format": "json",
         "text": r
