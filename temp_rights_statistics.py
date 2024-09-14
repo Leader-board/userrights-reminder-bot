@@ -15,4 +15,7 @@ def get_statistics():
             using_temp += 1
         print(f"Number of temporary rights in {wiki} = {number_of_rights}")
 
-get_statistics();
+    print(f"Number of wikis using temp rights at least once right now = {using_temp}")
+
+
+get_statistics()
