@@ -21,7 +21,7 @@ def get_url(wiki_name):
     return res['url'].values[0]
 
 
-def get_users_expiry_global():
+def get_users_expiry_global(interval = 1):
     # uses a different table
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'centralauth.analytics.db.svc.wikimedia.cloud',
                                   database=f'centralauth_p')
@@ -30,9 +30,9 @@ def get_users_expiry_global():
     INNER JOIN globaluser u
     ON u.gu_id = ug.gug_user
     WHERE gug_expiry is not null
-    AND gug_expiry < NOW() + INTERVAL 1 WEEK
+    AND gug_expiry < NOW() + INTERVAL {interval} WEEK
     AND gug_expiry > NOW()
-    """
+    """.format(interval = interval)
     cursor = cnx.cursor()
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
@@ -47,7 +47,7 @@ def get_wiki_usergroup(mw_name, wiki_name):
     return val  # this is a string
 
 
-def get_users_expiry(wiki_name):
+def get_users_expiry(wiki_name, interval = 1):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
                                   database=f'{wiki_name}_p')
     query = """
@@ -55,9 +55,9 @@ def get_users_expiry(wiki_name):
     INNER JOIN user u
     ON u.user_id = ug.ug_user
     WHERE ug_expiry is not null
-    AND ug_expiry < NOW() + INTERVAL 1 WEEK
+    AND ug_expiry < NOW() + INTERVAL {interval} WEEK
     AND ug_expiry > NOW()
-    """
+    """.format(interval = interval)
     cursor = cnx.cursor()
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
