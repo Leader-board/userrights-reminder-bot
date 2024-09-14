@@ -5,6 +5,7 @@ allowed_wikiset = ["global","aawiki","aawikibooks","aawiktionary","abwiki","abwi
 
 def get_statistics():
     using_temp = 0
+    total_temp = 0
     for wiki in allowed_wikiset:
         if wiki == 'global':
             df = reminder.get_users_expiry_global(999)
@@ -13,9 +14,11 @@ def get_statistics():
         number_of_rights = len(df)
         if len(df) > 0:
             using_temp += 1
+        total_temp += len(df)
         print(f"Number of temporary rights in {wiki} = {number_of_rights}")
 
     print(f"Number of wikis using temp rights at least once right now = {using_temp}")
+    print(f"Number of total temp rights = {total_temp}")
 
 
 get_statistics()
