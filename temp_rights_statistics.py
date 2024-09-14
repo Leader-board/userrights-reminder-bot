@@ -7,15 +7,19 @@ def get_statistics():
     using_temp = 0
     total_temp = 0
     for wiki in allowed_wikiset:
-        if wiki == 'global':
-            df = reminder.get_users_expiry_global(999)
-        else:
-            df = reminder.get_users_expiry(wiki, 999)
-        number_of_rights = len(df)
-        if len(df) > 0:
-            using_temp += 1
-        total_temp += len(df)
-        print(f"Number of temporary rights in {wiki} = {number_of_rights}")
+        try:
+            if wiki == 'global':
+                df = reminder.get_users_expiry_global(999)
+            else:
+                df = reminder.get_users_expiry(wiki, 999)
+            number_of_rights = len(df)
+            if len(df) > 0:
+                using_temp += 1
+            total_temp += len(df)
+            print(f"Number of temporary rights in {wiki} = {number_of_rights}")
+        except:
+            # this is OK since we can't tell easily if a wiki is inaccessible
+            pass
 
     print(f"Number of wikis using temp rights at least once right now = {using_temp}")
     print(f"Number of total temp rights = {total_temp}")
