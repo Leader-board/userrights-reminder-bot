@@ -1,0 +1,6 @@
+mysql
+pandas
+requests
+python-dateutil
+Babel
+mysql-connector-python
