@@ -6,9 +6,7 @@ import pandas as pd
 import requests, json
 from urllib.request import urlopen
 from dateutil import parser
-from babel.dates import format_date, format_datetime, format_time
-import ast
-
+from babel.dates import format_datetime
 
 def get_url(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta.analytics.db.svc.wikimedia.cloud',
@@ -45,7 +43,35 @@ def get_users_expiry_global(interval = 1):
 def get_wiki_usergroup(mw_name, wiki_name):
     # to map, for instance, Wikiversity's sysop (which is actually called curator)
     val = get_json_dict(f'MediaWiki:Group-{mw_name}', get_url(wiki_name))
+
+    if val is None:
+        # get name from database
+        val = get_message_name(mw_name, get_wiki_lang(wiki_name))
+
+
     return val  # this is a string
+
+def get_message_name(mw_name, wiki_lang):
+    # does not require login
+    S = requests.Session()
+
+    URL = "https://meta.wikimedia.org/w/api.php"
+
+    PARAMS = {
+        "action": "query",
+        "meta": "allmessages",
+        'ammessages': mw_name,
+        "amlang": wiki_lang,
+        "format": "json"
+    }
+
+    R = S.get(url=URL, params=PARAMS)
+    DATA = R.json()
+    rr =  DATA['query']['allmessages'][0]
+    if rr['*'] == '-':
+        return None
+    else:
+        return rr['*'] # '*' is the display name
 
 
 def get_users_expiry(wiki_name, interval = 1):
@@ -118,7 +144,7 @@ def get_token(wiki_url):
     return CSRF_TOKEN, URL, S, filecont[4]
 
 
-def get_wiki_url(wiki_name):
+def load_meta_p(wiki_name):
     cnx = mysql.connector.connect(option_files='/root/replica.my.cnf', host='meta.analytics.db.svc.wikimedia.cloud',
                                   database='meta_p')
     cursor = cnx.cursor()
@@ -128,7 +154,15 @@ def get_wiki_url(wiki_name):
 
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+    return res
+
+def get_wiki_url(wiki_name):
+    res = load_meta_p(wiki_name)
     return res['url'].values[0]
+
+def get_wiki_lang(wiki_name):
+    res = load_meta_p(wiki_name)
+    return res['lang'].values[0]
 
 
 def get_json_dict(page_name, wiki_link=r'https://meta.wikimedia.org'):
@@ -187,7 +221,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
             # do not process this - already in database
             return
 
-    print(local_data)
+    #print(local_data)
     local_exists = True
     if local_data is None:
         local_exists = False
