@@ -6,6 +6,7 @@ import pandas as pd
 import requests, json
 from urllib.request import urlopen
 from dateutil import parser
+from babel.dates import format_date, format_datetime, format_time
 import ast
 
 
@@ -197,6 +198,19 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
         local_exclude = local_data['always_excluded']
     else:
         local_exclude = None
+
+    # handle date formatting and locales
+
+    if local_exists and 'date_format' in local_data:
+        date_format = local_data['date_format']
+    else:
+        date_format = global_data['default_date_format']
+
+    if local_exists and 'date_locale' in local_data:
+        date_locale = local_data['date_locale']
+    else:
+        date_locale = global_data['default_date_locale']
+
     if (wiki_name != 'global' and user_right in global_exclude) or (local_exists and (user_right in local_exclude)) or (
             wiki_name == 'global' and user_right in global_rights_exclude):
         return  # do NOT proceed
@@ -212,7 +226,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
 
     # make user_expiry human-readable
     ts = parser.parse(user_expiry)
-    expiry_fmt = ts.strftime('%Y-%m-%d %H:%M:%S')
+    expiry_fmt = format_datetime(ts,date_format,locale=date_locale)
 
     # replace the $n where applicable
     message_to_send = message_to_send.replace("$1", user_right)
@@ -339,24 +353,5 @@ def inform_users(wiki_name, user, title, message):
     else:
         return True
 
-
-# get_users_expiry('wikifunctionswiki')
-
-
-# wikis to run
-# send_messages('wikifunctionswiki')
-# send_messages('enwikibooks')
-# send_messages('frwiki')
-# send_messages('eswiki')
-# send_messages('wikimaniawiki')
-# send_messages('enwikivoyage')
-# send_messages('enwiki')
-
-# send_messages('global')
-
-# send_messages('metawiki')
-# send_messages('mediawikiwiki')
-# send_messages('incubatorwiki')
-# send_messages('enwikibooks')
 if __name__ == "__main__":
     run_approved_wikis()
