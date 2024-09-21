@@ -150,7 +150,7 @@ def get_json_dict(page_name, wiki_link=r'https://meta.wikimedia.org'):
     return main_data
 
 
-def prepare_message(wiki_name, user_name, user_right, user_expiry):
+def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     # we assume that the wiki is in the allowlist
     # get the LOCAL and GLOBAL jsons
     global_data = get_json_dict('Global_reminder_bot/global')
@@ -172,8 +172,13 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
         # reminder: [user_name, user_right]
         exists = False
         for det in ll:
-            if (det[0] == user_name and det[1] == user_right):
+            # LEGACY: when the username was used for checking
+            if len(det) == 2 and det[0] == user_name and det[1] == user_right:
                 # we found it
+                exists = True
+                break
+            # we now compare by user ID, avoiding issues with rename
+            elif len(det) == 3 and det[2] == user_id and det[1] == user_right:
                 exists = True
                 break
 
@@ -235,7 +240,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry):
         local_database[wiki_name][user_expiry] = []
 
     ll = local_database[wiki_name][user_expiry]
-    ll.append([user_name, user_right])
+    ll.append([user_name, user_right, user_id])
     local_database[wiki_name][user_expiry] = ll
 
     # convert that to json and put it back
@@ -303,7 +308,7 @@ def send_messages(wiki_name):
         if (wiki_name != 'testwiki') or row.username.decode(
                 "utf-8") == 'Leaderbot' and 'WMF' not in row.username.decode("utf-8"):
             prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"),
-                            row.expiry.decode("utf-8"))
+                            row.expiry.decode("utf-8"), row.userid.decode("utf-8"))
 
 
 def inform_users(wiki_name, user, title, message):
@@ -353,5 +358,5 @@ def inform_users(wiki_name, user, title, message):
 # send_messages('mediawikiwiki')
 # send_messages('incubatorwiki')
 # send_messages('enwikibooks')
-
-run_approved_wikis()
+if __name__ == "__main__":
+    run_approved_wikis()
