@@ -67,7 +67,7 @@ def get_message_name(mw_name, wiki_lang):
 
     R = S.get(url=URL, params=PARAMS)
     DATA = R.json()
-    rr =  DATA['query']['allmessages'][0]
+    rr =  DATA['query']['allmessages'][0] # we asked for only one message
     if rr['*'] == '-':
         return None
     else:
