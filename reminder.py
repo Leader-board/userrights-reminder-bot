@@ -308,7 +308,7 @@ def send_messages(wiki_name):
         if (wiki_name != 'testwiki') or row.username.decode(
                 "utf-8") == 'Leaderbot' and 'WMF' not in row.username.decode("utf-8"):
             prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"),
-                            row.expiry.decode("utf-8"), row.userid.decode("utf-8"))
+                            row.expiry.decode("utf-8"), row.userid)
 
 
 def inform_users(wiki_name, user, title, message):
