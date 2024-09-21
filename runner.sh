@@ -1,2 +1,2 @@
-source pyvenv/bin/activate
+source venv/bin/activate
 python /data/project/permissions-expiry-reminder/userrights-reminder-bot/reminder.py
