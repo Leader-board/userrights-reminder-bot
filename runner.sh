@@ -1,0 +1,1 @@
+/mnt/nfs/labstore-secondary-tools-project/permissions-expiry-reminder/venv/bin/python /data/project/permissions-expiry-reminder/userrights-reminder-bot/reminder.py
