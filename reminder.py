@@ -145,7 +145,7 @@ def get_token(wiki_url):
 
 
 def load_meta_p(wiki_name):
-    cnx = mysql.connector.connect(option_files='/root/replica.my.cnf', host='meta.analytics.db.svc.wikimedia.cloud',
+    cnx = mysql.connector.connect(option_files='replica.my.cnf', host='meta.analytics.db.svc.wikimedia.cloud',
                                   database='meta_p')
     cursor = cnx.cursor()
     query = ("""
