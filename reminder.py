@@ -60,7 +60,7 @@ def get_message_name(mw_name, wiki_lang):
     PARAMS = {
         "action": "query",
         "meta": "allmessages",
-        'ammessages': mw_name,
+        'ammessages': f"group-{mw_name}",
         "amlang": wiki_lang,
         "format": "json"
     }
@@ -69,7 +69,7 @@ def get_message_name(mw_name, wiki_lang):
     DATA = R.json()
     rr =  DATA['query']['allmessages'][0] # we asked for only one message
     print(rr)
-    if rr['*'] == '-':
+    if '*' not in rr or rr['*'] == '-':
         return None
     else:
         return rr['*'] # '*' is the display name
