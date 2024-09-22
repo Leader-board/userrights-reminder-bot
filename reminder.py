@@ -149,7 +149,7 @@ def load_meta_p(wiki_name):
                                   database='meta_p')
     cursor = cnx.cursor()
     query = ("""
-    SELECT dbname, lang, family, name, url from wiki WHERE name = {}
+    SELECT dbname, lang, family, name, url from wiki WHERE name = '{}'
     """.format(wiki_name))
 
     cursor.execute(query)
