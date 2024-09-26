@@ -29,7 +29,7 @@ def get_users_expiry_global(interval = 1):
     INNER JOIN globaluser u
     ON u.gu_id = ug.gug_user
     WHERE gug_expiry is not null
-    AND gug_expiry < NOW() + INTERVAL {interval} WEEK
+    AND gug_expiry <= NOW() + INTERVAL {interval} WEEK
     AND gug_expiry > NOW()
     """.format(interval = interval)
     cursor = cnx.cursor()
@@ -68,7 +68,7 @@ def get_message_name(mw_name, wiki_lang):
     R = S.get(url=URL, params=PARAMS)
     DATA = R.json()
     rr =  DATA['query']['allmessages'][0] # we asked for only one message
-    print(rr)
+    # print(rr)
     if '*' not in rr or rr['*'] == '-':
         return None
     else:
@@ -354,8 +354,8 @@ def send_messages(wiki_name):
 
     for row in users.itertuples(index=True, name='Pandas'):
         # IMPORTANT: only Leaderbot works on testwiki!
-        if (wiki_name != 'testwiki') or row.username.decode(
-                "utf-8") == 'Leaderbot' and 'WMF' not in row.username.decode("utf-8"):
+        if ((wiki_name != 'testwiki') or row.username.decode(
+                "utf-8") == 'Leaderbot') and 'WMF' not in row.username.decode("utf-8"):
             prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"),
                             row.expiry.decode("utf-8"), row.userid)
 
