@@ -252,9 +252,9 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     # then determine the base message to send
     if wiki_name != 'global':
         message_to_send = global_data['text']['default']
-        if local_exists and (user_right in local_data['text']):
+        if local_exists and 'text' in local_data and (user_right in local_data['text']):
             message_to_send = local_data['text'][user_right]
-        elif local_exists:
+        elif local_exists and 'text' in local_data:
             message_to_send = local_data['text']['default']
     else:
         message_to_send = global_data['text']['default_global']
