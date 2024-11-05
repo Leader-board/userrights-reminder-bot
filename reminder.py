@@ -271,7 +271,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
         message_to_send = message_to_send.replace("($2)", '')
     message_to_send = message_to_send.replace("$3", expiry_fmt)
 
-    if local_exists and wiki_name != 'global':
+    if local_exists and 'title' in local_exists and 'default' in local_exists['title'] and wiki_name != 'global':
         title_to_send = local_data['title']['default']
     else:
         title_to_send = global_data['title']['default']
