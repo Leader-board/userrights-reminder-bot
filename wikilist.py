@@ -44,6 +44,8 @@ def generate_report():
     gb_allowed = get_gb_allowed()
     # then consider wikis that we can already run
     approved_wikis = get_json_dict('Global_reminder_bot/global')['approved_wikis']
+    # ignoring wikis that we know we CANNOT run
+    rejected_wikis = get_json_dict('Global_reminder_bot/global')['rejected_wikis']
     # get a set of all wikis that require explicit authorisation
     cannot_run = get_wikidata_set('4615128')
     cannot_run += get_wikidata_set('8639023')
@@ -52,7 +54,7 @@ def generate_report():
     cnt = 0
     invalid_set = []
     for crw in cannot_run:
-        if crw in gb_allowed and crw not in approved_wikis:
+        if crw in gb_allowed and crw not in approved_wikis and crw not in rejected_wikis:
             print(f"{crw} requires authorisation")
             cnt = cnt + 1
             invalid_set.append(crw)
@@ -65,7 +67,8 @@ def return_valid_wikis():
     gb_allowed = get_gb_allowed()
     invalid_set = generate_report()
     approved_wikis = get_json_dict('Global_reminder_bot/global')['approved_wikis'] # don't want wikis that are already approved to avoid duplication
-    valid_set = [x for x in gb_allowed if x not in invalid_set and x not in approved_wikis]
+    rejected_wikis = get_json_dict('Global_reminder_bot/global')['rejected_wikis'] # rejected wikis mean the same here
+    valid_set = [x for x in gb_allowed if x not in invalid_set and x not in approved_wikis and x not in rejected_wikis]
     return valid_set
 
 def run_auto_approved_wikis():
