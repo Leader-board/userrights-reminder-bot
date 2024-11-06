@@ -1,4 +1,5 @@
 # global bot reminder
+import importlib
 import re
 
 import mysql.connector
@@ -7,6 +8,9 @@ import requests, json
 from urllib.request import urlopen
 from dateutil import parser
 from babel.dates import format_datetime
+
+import wikilist
+
 
 def get_url(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta.analytics.db.svc.wikimedia.cloud',
@@ -306,7 +310,7 @@ def get_opt_out():
         #print(d['title'])
         # must be in User namespace - ignore if not
         if 'User:' in d['title']:
-            excluded_users.append(re.split('[:\/]', d['title'])[1])
+            excluded_users.append(re.split('[:/]', d['title'])[1])
     return excluded_users
 
 
@@ -322,7 +326,6 @@ def run_approved_wikis():
     ls = get_json_dict('Global_reminder_bot/global')['approved_wikis'] # this is an array
     for wiki_name in ls:
         send_messages(wiki_name)
-
 
 
 def user_expiry_database_save(db):
@@ -390,3 +393,4 @@ def inform_users(wiki_name, user, title, message):
 
 if __name__ == "__main__":
     run_approved_wikis()
+    wikilist.run_auto_approved_wikis()
