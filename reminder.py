@@ -384,9 +384,9 @@ def inform_users(wiki_name, user, title, message):
     }
     R = S.post(URL, data=PARAMS_3)
     DATA = R.json()
-
-    print(DATA)
-    if 'error' in DATA or 'Failure' in DATA:
+    DATA_dict = json.loads(DATA)
+    print(DATA_dict)
+    if 'result' not in DATA_dict or DATA_dict['result'] == 'Failure' or DATA_dict['result'] == 'error':
         return False  # do not proceed - probably ratelimit issue or other failure
     else:
         return True
