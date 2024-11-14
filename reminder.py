@@ -385,7 +385,7 @@ def inform_users(wiki_name, user, title, message):
     R = S.post(URL, data=PARAMS_3)
     DATA = R.json()
     print(DATA)
-    if 'result' not in DATA or DATA['result'] is not 'Success':
+    if 'result' not in DATA or DATA['result'] != 'Success':
         return False  # do not proceed - probably ratelimit issue or other failure
     else:
         return True
