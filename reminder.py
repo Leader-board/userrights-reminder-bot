@@ -344,7 +344,7 @@ def user_expiry_database_save(db):
     }
     R = S.post(URL, data=PARAMS_3)
     # print(R.content)
-    DATA = R.json()
+  #  DATA = R.json()
 
     # print(DATA)
 
@@ -386,8 +386,8 @@ def inform_users(wiki_name, user, title, message):
     DATA = R.json()
 
     print(DATA)
-    if 'error' in DATA:
-        return False  # do not proceed - probably ratelimit issue
+    if 'error' in DATA or 'Failure' in DATA:
+        return False  # do not proceed - probably ratelimit issue or other failure
     else:
         return True
 
