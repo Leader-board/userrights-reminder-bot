@@ -285,7 +285,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     title_to_send = title_to_send.replace("$1", user_right)
     # and then we can send!
     global only_update_db
-    print(only_update_db)
+ #   print(only_update_db)
     if not only_update_db:
         status = inform_users(wiki_name, user_name, title_to_send, message_to_send)
     else: # we should not send anything
