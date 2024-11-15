@@ -1,5 +1,5 @@
 # global bot reminder
-import argparse
+import argparse as ap
 import importlib
 import re
 
@@ -286,6 +286,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     title_to_send = title_to_send.replace("$1", user_right)
     # and then we can send!
     global only_update_db
+    print(only_update_db)
     if not only_update_db:
         status = inform_users(wiki_name, user_name, title_to_send, message_to_send)
     else: # we should not send anything
@@ -398,7 +399,7 @@ def inform_users(wiki_name, user, title, message):
         return True
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Global reminder bot. See [[metawiki:Global reminder bot]]")
+    parser = ap.ArgumentParser(description="Global reminder bot. See [[metawiki:Global reminder bot]]")
     parser.add_argument('--only_update_database', type=bool, nargs='?', const=True, default=False,
         help='Does not make any edits to individual edits but updates the database - use only if the database update failed but users were notified')
    # global only_update_db
