@@ -1,6 +1,5 @@
 # global bot reminder
 import argparse as ap
-import importlib
 import re
 
 import mysql.connector
@@ -399,11 +398,11 @@ def inform_users(wiki_name, user, title, message):
         return True
 
 if __name__ == "__main__":
-    parser = ap.ArgumentParser(description="Global reminder bot. See [[metawiki:Global reminder bot]]")
-    parser.add_argument('--only_update_database', type=bool, nargs='?', const=True, default=False,
+    input_parser = ap.ArgumentParser(description="Global reminder bot. See [[metawiki:Global reminder bot]]")
+    input_parser.add_argument('--only_update_database', type=bool, nargs='?', const=True, default=False,
         help='Does not make any edits to individual edits but updates the database - use only if the database update failed but users were notified')
    # global only_update_db
-    args = parser.parse_args()
+    args = input_parser.parse_args()
     if args.only_update_database:
         only_update_db = True
 
