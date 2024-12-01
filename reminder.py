@@ -217,7 +217,7 @@ def get_json_dict(page_name, wiki_link=r'https://meta.wikimedia.org'):
 def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     # we assume that the wiki is in the allowlist
     # get the LOCAL and GLOBAL jsons
-    global central_log, current_stream
+    global current_stream
     current_stream = ''
     global_data = get_json_dict('Global_reminder_bot/global')
     if wiki_name != 'global':
@@ -332,7 +332,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     # convert that to json and put it back
 
     user_expiry_database_save(local_database)
-    central_log[wiki_name] = current_stream
+
 
 
 def get_opt_out():
@@ -346,34 +346,6 @@ def get_opt_out():
         if 'User:' in d['title']:
             excluded_users.append(re.split('[:/]', d['title'])[1])
     return excluded_users
-
-# def get_when_rights_added(username, wiki_name, right_to_expire):
-#     # to avoid cases where the bot reminds a user that they assigned for a few minutes or even days
-#     # first get the latest instance where the right was added
-#     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
-#                                   database=f'{wiki_name}_p')
-#     cursor = cnx.cursor()
-#     query = """
-#     SELECT * from logging WHERE log_type = "rights" AND log_action = 'rights' AND log_title = {username} ORDER BY log_timestamp DESC LIMIT 1
-#     """.format(username = username)
-#     cursor.execute(query)
-#     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
-#     # parse log_params
-#     log_params = res['url'].values[0]
-#     log_data = phpserialize.loads(bytes(log_params, 'UTF-8'), decode_strings=True)
-#     # they are hardcoded
-#     # identify the key whose values is the right due to expire
-#     right_id = None
-#     for id in log_data['5::newgroups']:
-#         if log_data['5::newgroups'][id] == right_to_expire:
-#             right_id = id
-#
-#     if right_id is None:
-#         return -1 # for some reason, we could not find the right
-#
-#     # OK, we found the right. Now use that to find the new expiry
-
-
 
 def user_expiry_database_load():
     # JSON database stored on-wiki
@@ -411,6 +383,8 @@ def user_expiry_database_save(db):
 
 
 def send_messages(wiki_name):
+    global central_log, current_stream
+    current_stream = ''
     if wiki_name != 'global':
         users = get_users_expiry(wiki_name)
     else:
@@ -422,6 +396,8 @@ def send_messages(wiki_name):
                 "utf-8") == 'Leaderbot') and 'WMF' not in row.username.decode("utf-8"):
             prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"),
                             row.expiry.decode("utf-8"), row.userid)
+
+    central_log[wiki_name] = current_stream
 
 
 def inform_users(wiki_name, user, title, message):
