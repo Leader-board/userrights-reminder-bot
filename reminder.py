@@ -217,7 +217,6 @@ def get_json_dict(page_name, wiki_link=r'https://meta.wikimedia.org'):
 def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     # we assume that the wiki is in the allowlist
     # get the LOCAL and GLOBAL jsons
-    vars.current_stream = ''
     global_data = get_json_dict('Global_reminder_bot/global')
     if wiki_name != 'global':
         local_data = get_json_dict(f'Global_reminder_bot/{wiki_name}')

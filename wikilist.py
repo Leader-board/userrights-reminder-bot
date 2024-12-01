@@ -1,5 +1,7 @@
 # these would generally be the wikis with a BRFA or similar - i.e, requires manual checks
 import requests
+
+import vars
 from reminder import get_json_dict, send_messages
 
 
@@ -53,13 +55,17 @@ def generate_report():
     # for each wiki in this, check whether it's already approved AND in the gb_allowed set
     cnt = 0
     invalid_set = []
+    stream = ''
     for crw in cannot_run:
         if crw in gb_allowed and crw not in approved_wikis and crw not in rejected_wikis:
             print(f"{crw} requires authorisation")
+            stream = stream + f"{crw} requires authorisation\n"
             cnt = cnt + 1
             invalid_set.append(crw)
 
     print(f"{cnt} wikis require authorisation")
+    stream + stream + f"{cnt} wikis require authorisation\n"
+    vars.central_log['other_data'] = stream
     return invalid_set
 
 def return_valid_wikis():
