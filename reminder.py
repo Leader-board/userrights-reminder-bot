@@ -465,3 +465,4 @@ if __name__ == "__main__":
     print (f"only_update_db = {only_update_db}")
     run_approved_wikis()
     wikilist.run_auto_approved_wikis()
+    send_central_logging()
