@@ -11,7 +11,6 @@ from babel.dates import format_datetime
 
 import vars
 import wikilist
-from vars import central_log, current_stream
 
 only_update_db = False
 
@@ -105,7 +104,7 @@ def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
 
 def send_central_logging():
     # send the logs up to Meta-Wiki
-    r = json.dumps(central_log)
+    r = json.dumps(vars.central_log)
     # save that to db
     wiki_url = 'https://meta.wikimedia.org'
     CSRF_TOKEN, URL, S, api_link = get_token(wiki_url)
@@ -428,8 +427,6 @@ def inform_users(wiki_name, user, title, message):
         return True
 
 if __name__ == "__main__":
-    vars.central_log = {}
-    vars.current_stream = ''
     input_parser = ap.ArgumentParser(description="Global reminder bot. See [[metawiki:Global reminder bot]]")
     input_parser.add_argument('--only_update_database', type=bool, nargs='?', const=True, default=False,
         help='Does not make any edits to individual edits but updates the database - use only if the database update failed but users were notified')

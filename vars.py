@@ -1,2 +1,2 @@
-central_log = None
-current_stream = None
+central_log = {}
+current_stream = ''
