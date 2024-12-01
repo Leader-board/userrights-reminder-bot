@@ -8,7 +8,6 @@ import requests, json
 from urllib.request import urlopen
 from dateutil import parser
 from babel.dates import format_datetime
-import phpserialize
 
 import wikilist
 
