@@ -8,9 +8,9 @@ def get_statistics():
     for wiki in allowed_wikiset:
         try:
             if wiki == 'global':
-                df = reminder.get_users_expiry_global(999)
+                df = reminder.get_users_expiry_global(999, 0)
             else:
-                df = reminder.get_users_expiry(wiki, 999)
+                df = reminder.get_users_expiry(wiki, 999, 0)
             number_of_rights = len(df)
             if len(df) > 0:
                 using_temp += 1

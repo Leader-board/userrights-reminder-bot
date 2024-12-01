@@ -8,6 +8,7 @@ import requests, json
 from urllib.request import urlopen
 from dateutil import parser
 from babel.dates import format_datetime
+import phpserialize
 
 import wikilist
 
@@ -26,7 +27,7 @@ def get_url(wiki_name):
     return res['url'].values[0]
 
 
-def get_users_expiry_global(interval = 1):
+def get_users_expiry_global(interval = 1, lower_bound = 25):
     # uses a different table
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'centralauth.analytics.db.svc.wikimedia.cloud',
                                   database=f'centralauth_p')
@@ -36,8 +37,8 @@ def get_users_expiry_global(interval = 1):
     ON u.gu_id = ug.gug_user
     WHERE gug_expiry is not null
     AND gug_expiry <= NOW() + INTERVAL {interval} WEEK
-    AND gug_expiry > NOW()
-    """.format(interval = interval)
+    AND gug_expiry >= NOW() + INTERVAL {lower_bound} HOUR
+    """.format(interval = interval, lower_bound = lower_bound)
     cursor = cnx.cursor()
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
@@ -81,7 +82,7 @@ def get_message_name(mw_name, wiki_lang):
         return rr['*'] # '*' is the display name
 
 
-def get_users_expiry(wiki_name, interval = 1):
+def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
                                   database=f'{wiki_name}_p')
     query = """
@@ -90,8 +91,8 @@ def get_users_expiry(wiki_name, interval = 1):
     ON u.user_id = ug.ug_user
     WHERE ug_expiry is not null
     AND ug_expiry < NOW() + INTERVAL {interval} WEEK
-    AND ug_expiry > NOW()
-    """.format(interval = interval)
+    AND ug_expiry > NOW() + INTERVAL {lower_bound} HOUR
+    """.format(interval = interval, lower_bound = lower_bound)
     cursor = cnx.cursor()
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
@@ -319,6 +320,33 @@ def get_opt_out():
         if 'User:' in d['title']:
             excluded_users.append(re.split('[:/]', d['title'])[1])
     return excluded_users
+
+# def get_when_rights_added(username, wiki_name, right_to_expire):
+#     # to avoid cases where the bot reminds a user that they assigned for a few minutes or even days
+#     # first get the latest instance where the right was added
+#     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
+#                                   database=f'{wiki_name}_p')
+#     cursor = cnx.cursor()
+#     query = """
+#     SELECT * from logging WHERE log_type = "rights" AND log_action = 'rights' AND log_title = {username} ORDER BY log_timestamp DESC LIMIT 1
+#     """.format(username = username)
+#     cursor.execute(query)
+#     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+#     # parse log_params
+#     log_params = res['url'].values[0]
+#     log_data = phpserialize.loads(bytes(log_params, 'UTF-8'), decode_strings=True)
+#     # they are hardcoded
+#     # identify the key whose values is the right due to expire
+#     right_id = None
+#     for id in log_data['5::newgroups']:
+#         if log_data['5::newgroups'][id] == right_to_expire:
+#             right_id = id
+#
+#     if right_id is None:
+#         return -1 # for some reason, we could not find the right
+#
+#     # OK, we found the right. Now use that to find the new expiry
+
 
 
 def user_expiry_database_load():
