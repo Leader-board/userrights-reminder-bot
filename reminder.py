@@ -13,7 +13,8 @@ import phpserialize
 import wikilist
 
 only_update_db = False
-
+central_log = {}
+current_stream = ''
 
 def get_url(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta.analytics.db.svc.wikimedia.cloud',
@@ -97,8 +98,29 @@ def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     print(res)
+    global current_stream
+    current_stream = current_stream + res.to_string() + '\n\n'
     cursor.close()
     return res
+
+def send_central_logging():
+    # send the logs up to Meta-Wiki
+    r = json.dumps(central_log)
+    # save that to db
+    wiki_url = 'https://meta.wikimedia.org'
+    CSRF_TOKEN, URL, S, api_link = get_token(wiki_url)
+    PARAMS_3 = {
+        "action": "edit",
+        "title": "Global reminder bot/log",
+        "contentmodel": "json",
+        "bot": "yes",
+        "token": CSRF_TOKEN,
+        "format": "json",
+        "text": r
+    }
+    R = S.post(URL, data=PARAMS_3)
+
+
 
 
 def get_token(wiki_url):
@@ -196,6 +218,8 @@ def get_json_dict(page_name, wiki_link=r'https://meta.wikimedia.org'):
 def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     # we assume that the wiki is in the allowlist
     # get the LOCAL and GLOBAL jsons
+    global central_log, current_stream
+    current_stream = ''
     global_data = get_json_dict('Global_reminder_bot/global')
     if wiki_name != 'global':
         local_data = get_json_dict(f'Global_reminder_bot/{wiki_name}')
@@ -291,8 +315,11 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
         status = inform_users(wiki_name, user_name, title_to_send, message_to_send)
     else: # we should not send anything
         status = True
+
+    global current_stream
     if not status:
         print("Error detected")
+        current_stream += 'Error detected \n'
         return  # do not add in database
     # after sending, add its entry in database
     if wiki_name not in local_database:
@@ -307,6 +334,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     # convert that to json and put it back
 
     user_expiry_database_save(local_database)
+    central_log[wiki_name] = current_stream
 
 
 def get_opt_out():
@@ -420,6 +448,8 @@ def inform_users(wiki_name, user, title, message):
     R = S.post(URL, data=PARAMS_3)
     DATA = R.json()
     print(DATA)
+    global current_stream
+    current_stream = current_stream + DATA + '\n'
     if 'result' not in DATA['edit'] or DATA['edit']['result'] != 'Success':
         return False  # do not proceed - probably ratelimit issue or other failure
     else:
