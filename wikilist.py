@@ -64,7 +64,7 @@ def generate_report():
             invalid_set.append(crw)
 
     print(f"{cnt} wikis require authorisation")
-    stream + stream + f"{cnt} wikis require authorisation\n"
+    stream = stream + f"{cnt} wikis require authorisation\n"
     vars.central_log['other_data'] = stream
     return invalid_set
 
