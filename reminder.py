@@ -9,11 +9,12 @@ from urllib.request import urlopen
 from dateutil import parser
 from babel.dates import format_datetime
 
+import vars
 import wikilist
+from vars import central_log, current_stream
 
 only_update_db = False
-central_log = None
-current_stream = None
+
 
 def get_url(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta.analytics.db.svc.wikimedia.cloud',
@@ -43,8 +44,7 @@ def get_users_expiry_global(interval = 1, lower_bound = 25):
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     print(res)
-    global current_stream
-    current_stream = current_stream + res.to_string() + '\n'
+    vars.current_stream = vars.current_stream + res.to_string() + '\n'
     cursor.close()
     return res
 
@@ -99,8 +99,7 @@ def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     print(res)
-    global current_stream
-    current_stream = current_stream + res.to_string() + '\n'
+    vars.current_stream = vars.current_stream + res.to_string() + '\n'
     cursor.close()
     return res
 
@@ -219,8 +218,7 @@ def get_json_dict(page_name, wiki_link=r'https://meta.wikimedia.org'):
 def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     # we assume that the wiki is in the allowlist
     # get the LOCAL and GLOBAL jsons
-    global current_stream
-    current_stream = ''
+    vars.current_stream = ''
     global_data = get_json_dict('Global_reminder_bot/global')
     if wiki_name != 'global':
         local_data = get_json_dict(f'Global_reminder_bot/{wiki_name}')
@@ -319,7 +317,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
 
     if not status:
         print("Error detected")
-        current_stream += 'Error detected \n'
+        vars.current_stream += 'Error detected \n'
         return  # do not add in database
     # after sending, add its entry in database
     if wiki_name not in local_database:
@@ -385,8 +383,7 @@ def user_expiry_database_save(db):
 
 
 def send_messages(wiki_name):
-    global central_log, current_stream
-    current_stream = ''
+    vars.current_stream = ''
     if wiki_name != 'global':
         users = get_users_expiry(wiki_name)
     else:
@@ -399,7 +396,7 @@ def send_messages(wiki_name):
             prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"),
                             row.expiry.decode("utf-8"), row.userid)
 
-    central_log[wiki_name] = current_stream
+    vars.central_log[wiki_name] = vars.current_stream
 
 
 def inform_users(wiki_name, user, title, message):
@@ -424,16 +421,15 @@ def inform_users(wiki_name, user, title, message):
     R = S.post(URL, data=PARAMS_3)
     DATA = R.json()
     print(DATA)
-    global current_stream
-    current_stream = current_stream + json.dumps(DATA) + '\n'
+    vars.current_stream = vars.current_stream + json.dumps(DATA) + '\n'
     if 'result' not in DATA['edit'] or DATA['edit']['result'] != 'Success':
         return False  # do not proceed - probably ratelimit issue or other failure
     else:
         return True
 
 if __name__ == "__main__":
-    central_log = {}
-    current_stream = ''
+    vars.central_log = {}
+    vars.current_stream = ''
     input_parser = ap.ArgumentParser(description="Global reminder bot. See [[metawiki:Global reminder bot]]")
     input_parser.add_argument('--only_update_database', type=bool, nargs='?', const=True, default=False,
         help='Does not make any edits to individual edits but updates the database - use only if the database update failed but users were notified')
