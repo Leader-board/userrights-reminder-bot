@@ -316,7 +316,6 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     else: # we should not send anything
         status = True
 
-    global current_stream
     if not status:
         print("Error detected")
         current_stream += 'Error detected \n'
