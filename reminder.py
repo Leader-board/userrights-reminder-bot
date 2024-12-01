@@ -12,8 +12,8 @@ from babel.dates import format_datetime
 import wikilist
 
 only_update_db = False
-central_log = {}
-current_stream = ''
+central_log = None
+current_stream = None
 
 def get_url(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta.analytics.db.svc.wikimedia.cloud',
@@ -43,6 +43,8 @@ def get_users_expiry_global(interval = 1, lower_bound = 25):
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     print(res)
+    global current_stream
+    current_stream = current_stream + res.to_string() + '\n'
     cursor.close()
     return res
 
@@ -98,7 +100,7 @@ def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
     print(res)
     global current_stream
-    current_stream = current_stream + res.to_string() + '\n\n'
+    current_stream = current_stream + res.to_string() + '\n'
     cursor.close()
     return res
 
@@ -430,6 +432,8 @@ def inform_users(wiki_name, user, title, message):
         return True
 
 if __name__ == "__main__":
+    central_log = {}
+    current_stream = ''
     input_parser = ap.ArgumentParser(description="Global reminder bot. See [[metawiki:Global reminder bot]]")
     input_parser.add_argument('--only_update_database', type=bool, nargs='?', const=True, default=False,
         help='Does not make any edits to individual edits but updates the database - use only if the database update failed but users were notified')
@@ -441,5 +445,5 @@ if __name__ == "__main__":
     print (f"only_update_db = {only_update_db}")
     run_approved_wikis()
     wikilist.run_auto_approved_wikis()
-    print(central_log)
+    #print(central_log)
     send_central_logging()
