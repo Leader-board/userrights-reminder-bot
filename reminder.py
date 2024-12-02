@@ -84,23 +84,29 @@ def get_message_name(mw_name, wiki_lang):
 
 
 def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
-    cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
-                                  database=f'{wiki_name}_p')
-    query = """
-    SELECT ug.ug_user as userid, u.user_name as username, ug.ug_group as userright, ug.ug_expiry as expiry from user_groups ug
-    INNER JOIN user u
-    ON u.user_id = ug.ug_user
-    WHERE ug_expiry is not null
-    AND ug_expiry < NOW() + INTERVAL {interval} WEEK
-    AND ug_expiry > NOW() + INTERVAL {lower_bound} HOUR
-    """.format(interval = interval, lower_bound = lower_bound)
-    cursor = cnx.cursor()
-    cursor.execute(query)
-    res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
-    print(res)
-    vars.current_stream = vars.current_stream + res.to_string() + '\n'
-    cursor.close()
-    return res
+    try:
+        cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
+                                      database=f'{wiki_name}_p')
+        query = """
+        SELECT ug.ug_user as userid, u.user_name as username, ug.ug_group as userright, ug.ug_expiry as expiry from user_groups ug
+        INNER JOIN user u
+        ON u.user_id = ug.ug_user
+        WHERE ug_expiry is not null
+        AND ug_expiry < NOW() + INTERVAL {interval} WEEK
+        AND ug_expiry > NOW() + INTERVAL {lower_bound} HOUR
+        """.format(interval = interval, lower_bound = lower_bound)
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+        print(res)
+        vars.current_stream = vars.current_stream + res.to_string() + '\n'
+        cursor.close()
+        return res
+    except Exception as e:
+        print(e)
+        vars.current_stream = vars.current_stream + str(e)
+        return None
+
 
 def send_central_logging():
     # send the logs up to Meta-Wiki
@@ -387,12 +393,13 @@ def send_messages(wiki_name):
     else:
         users = get_users_expiry_global()
 
-    for row in users.itertuples(index=True, name='Pandas'):
-        # IMPORTANT: only Leaderbot works on testwiki!
-        if ((wiki_name != 'testwiki') or row.username.decode(
-                "utf-8") == 'Leaderbot') and 'WMF' not in row.username.decode("utf-8"):
-            prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"),
-                            row.expiry.decode("utf-8"), row.userid)
+    if users is not None:
+        for row in users.itertuples(index=True, name='Pandas'):
+            # IMPORTANT: only Leaderbot works on testwiki!
+            if ((wiki_name != 'testwiki') or row.username.decode(
+                    "utf-8") == 'Leaderbot') and 'WMF' not in row.username.decode("utf-8"):
+                prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"),
+                                row.expiry.decode("utf-8"), row.userid)
 
     vars.central_log[wiki_name] = vars.current_stream
 
