@@ -427,7 +427,7 @@ def inform_users(wiki_name, user, title, message):
     DATA = R.json()
     print(DATA)
     vars.current_stream = vars.current_stream + json.dumps(DATA) + '\n'
-    if 'result' not in DATA['edit'] or DATA['edit']['result'] != 'Success':
+    if 'error' in DATA or 'result' not in DATA['edit'] or DATA['edit']['result'] != 'Success':
         return False  # do not proceed - probably ratelimit issue or other failure
     else:
         return True
