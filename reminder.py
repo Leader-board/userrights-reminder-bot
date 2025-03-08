@@ -263,7 +263,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     # check if the right is in the global OR local exclusion lists
     global_exclude = global_data['always_excluded_local']
     global_rights_exclude = global_data['always_excluded_global']
-    if local_exists:
+    if local_exists and 'always_excluded' in local_data:
         local_exclude = local_data['always_excluded']
     else:
         local_exclude = None
@@ -311,6 +311,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
         title_to_send = global_data['title']['default']
 
     title_to_send = title_to_send.replace("$1", user_right)
+    title_to_send = title_to_send.replace("$2", user_right)
     # and then we can send!
     global only_update_db
  #   print(only_update_db)
@@ -442,7 +443,12 @@ if __name__ == "__main__":
         only_update_db = True
 
     print (f"only_update_db = {only_update_db}")
-    run_approved_wikis()
-    wikilist.run_auto_approved_wikis()
+    try:
+        run_approved_wikis()
+        wikilist.run_auto_approved_wikis()
+    except Exception as e:
+        # required since send_central_logging must run
+        print(f"Error detected - details {e}")
+        vars.current_stream += f'Error detected {e}\n'
     #print(central_log)
     send_central_logging()
