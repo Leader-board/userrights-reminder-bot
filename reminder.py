@@ -310,8 +310,11 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     else:
         title_to_send = global_data['title']['default']
 
-    title_to_send = title_to_send.replace("$1", user_right)
-    title_to_send = title_to_send.replace("$2", user_right)
+    if "$1" in title_to_send:
+        title_to_send = title_to_send.replace("$1", user_right)
+    else:
+        # if $2 is not valid, assume it is $1
+        title_to_send = title_to_send.replace("$2", get_wiki_usergroup(user_right, wiki_name) if get_wiki_usergroup(user_right, wiki_name) is not None else user_right)
     # and then we can send!
     global only_update_db
  #   print(only_update_db)
