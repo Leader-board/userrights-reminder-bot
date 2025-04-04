@@ -289,7 +289,11 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
         if local_exists and 'text' in local_data and (user_right in local_data['text']):
             message_to_send = local_data['text'][user_right]
         elif local_exists and 'text' in local_data:
-            message_to_send = local_data['text']['default']
+            # some wikis may not choose to even have default
+            if 'default' in local_data['text']:
+                message_to_send = local_data['text']['default']
+            else:
+                message_to_send = global_data['text']['default']
     else:
         message_to_send = global_data['text']['default_global']
 
@@ -305,8 +309,9 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
         message_to_send = message_to_send.replace("($2)", '')
     message_to_send = message_to_send.replace("$3", expiry_fmt)
 
-    if local_exists and 'title' in local_data and 'default' in local_data['title'] and wiki_name != 'global':
-        title_to_send = local_data['title']['default']
+    # supporting custom titles by userright
+    if local_exists and 'title' in local_data and (user_right in local_data['title'] or 'default' in local_data['title']) and wiki_name != 'global':
+        title_to_send = local_data['title'][user_right] if user_right in local_data['title'] else local_data['title']['default']
     else:
         title_to_send = global_data['title']['default']
 
