@@ -181,7 +181,7 @@ def get_token(wiki_url):
 
 def load_meta_p(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host='meta.analytics.db.svc.wikimedia.cloud',
-                                  database='meta_p')
+                                  database='meta_p', charset='utf8', use_unicode=True)
     cursor = cnx.cursor()
     query = ("""
     SELECT dbname, lang, family, name, url from wiki WHERE dbname = '{}'
@@ -405,10 +405,9 @@ def send_messages(wiki_name):
     if users is not None:
         for row in users.itertuples(index=True, name='Pandas'):
             # IMPORTANT: only Leaderbot works on testwiki!
-            if ((wiki_name != 'testwiki') or row.username.decode(
-                    "utf-8") == 'Leaderbot') and 'WMF' not in row.username.decode("utf-8"):
-                prepare_message(wiki_name, row.username.decode("utf-8"), row.userright.decode("utf-8"),
-                                row.expiry.decode("utf-8"), row.userid)
+            if ((wiki_name != 'testwiki') or row.username == 'Leaderbot') and 'WMF' not in row.username:
+                prepare_message(wiki_name, row.username, row.userright,
+                                row.expiry, row.userid)
 
     vars.central_log[wiki_name] = vars.current_stream
 
