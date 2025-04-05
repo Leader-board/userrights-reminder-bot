@@ -11,6 +11,8 @@ from babel.dates import format_datetime
 
 import vars
 import wikilist
+import traceback
+
 
 only_update_db = False
 
@@ -455,7 +457,8 @@ if __name__ == "__main__":
         wikilist.run_auto_approved_wikis()
     except Exception as e:
         # required since send_central_logging must run
-        print(f"Error detected - details {e}")
-        vars.current_stream += f'Error detected {e}\n'
+        exception_details = traceback.format_exc()
+        print(f"Error detected - details {exception_details}")
+        vars.current_stream += f'Error detected {exception_details}\n'
     #print(central_log)
     send_central_logging()
