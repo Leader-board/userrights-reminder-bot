@@ -19,7 +19,7 @@ only_update_db = False
 
 def get_url(wiki_name):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'meta.analytics.db.svc.wikimedia.cloud',
-                                  database=f'meta_p')
+                                  database=f'meta_p', charset='utf8')
     cursor = cnx.cursor()
     query = ("""
     SELECT dbname, lang, family, name, url from wiki WHERE dbname = '{wiki_name}'
@@ -32,7 +32,7 @@ def get_url(wiki_name):
 def get_users_expiry_global(interval = 1, lower_bound = 25):
     # uses a different table
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'centralauth.analytics.db.svc.wikimedia.cloud',
-                                  database=f'centralauth_p')
+                                  database=f'centralauth_p', charset='utf8')
     query = """
     SELECT ug.gug_user as userid, u.gu_name as username, ug.gug_group as userright, ug.gug_expiry as expiry from global_user_groups ug
     INNER JOIN globaluser u
@@ -88,7 +88,7 @@ def get_message_name(mw_name, wiki_lang):
 def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
     try:
         cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
-                                      database=f'{wiki_name}_p')
+                                      database=f'{wiki_name}_p', charset='utf8')
         query = """
         SELECT ug.ug_user as userid, u.user_name as username, ug.ug_group as userright, ug.ug_expiry as expiry from user_groups ug
         INNER JOIN user u
