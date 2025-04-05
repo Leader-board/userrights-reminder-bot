@@ -407,6 +407,7 @@ def send_messages(wiki_name):
     if users is not None:
         for row in users.itertuples(index=True, name='Pandas'):
             # IMPORTANT: only Leaderbot works on testwiki!
+            print(row)
             if ((wiki_name != 'testwiki') or row.username == 'Leaderbot') and 'WMF' not in row.username:
                 prepare_message(wiki_name, row.username, row.userright,
                                 row.expiry, row.userid)
