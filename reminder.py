@@ -100,7 +100,7 @@ def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
         cursor = cnx.cursor()
         cursor.execute(query)
         res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
-        #print(res)
+        print(res)
         vars.current_stream = vars.current_stream + res.to_string() + '\n'
         cursor.close()
         return res
@@ -407,7 +407,7 @@ def send_messages(wiki_name):
     if users is not None:
         for row in users.itertuples(index=True, name='Pandas'):
             # IMPORTANT: only Leaderbot works on testwiki!
-            print(row)
+            #print(row)
             if ((wiki_name != 'testwiki') or row.username == 'Leaderbot') and 'WMF' not in row.username:
                 prepare_message(wiki_name, row.username, row.userright,
                                 row.expiry, row.userid)
