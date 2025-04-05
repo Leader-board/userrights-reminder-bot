@@ -14,7 +14,7 @@ import wikilist
 import traceback
 
 
-only_update_db = True
+only_update_db = False
 
 
 def get_url(wiki_name):
