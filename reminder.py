@@ -22,7 +22,7 @@ def get_url(wiki_name):
                                   database=f'meta_p', charset='utf8', use_unicode=True)
     cursor = cnx.cursor()
     query = ("""
-    SELECT dbname, lang, family, name, url from wiki WHERE dbname = '{wiki_name}'
+    SELECT CONVERT(dbname using utf8), CONVERT(lang using utf8), CONVERT(family using utf8), CONVERT(name using utf8), CONVERT(url using utf8) from wiki WHERE dbname = '{wiki_name}'
     """.format(wiki_name=wiki_name))
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
@@ -34,7 +34,7 @@ def get_users_expiry_global(interval = 1, lower_bound = 25):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'centralauth.analytics.db.svc.wikimedia.cloud',
                                   database=f'centralauth_p', charset='utf8', use_unicode=True)
     query = """
-    SELECT ug.gug_user as userid, u.gu_name as username, ug.gug_group as userright, ug.gug_expiry as expiry from global_user_groups ug
+    SELECT ug.gug_user as userid, CONVERT(u.gu_name using utf8) as username, CONVERT(ug.gug_group using utf8) as userright, ug.gug_expiry as expiry from global_user_groups ug
     INNER JOIN globaluser u
     ON u.gu_id = ug.gug_user
     WHERE gug_expiry is not null
@@ -90,7 +90,7 @@ def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
         cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
                                       database=f'{wiki_name}_p', charset='utf8', use_unicode=True)
         query = """
-        SELECT ug.ug_user as userid, u.user_name as username, ug.ug_group as userright, ug.ug_expiry as expiry from user_groups ug
+        SELECT ug.ug_user as userid, CONVERT(u.user_name USING utf8) as username, CONVERT(ug.ug_group USING utf8) as userright, ug.ug_expiry as expiry from user_groups ug
         INNER JOIN user u
         ON u.user_id = ug.ug_user
         WHERE ug_expiry is not null
@@ -186,7 +186,7 @@ def load_meta_p(wiki_name):
                                   database='meta_p', charset='utf8', use_unicode=True)
     cursor = cnx.cursor()
     query = ("""
-    SELECT dbname, lang, family, name, url from wiki WHERE dbname = '{}'
+    SELECT CONVERT(dbname using utf8), CONVERT(lang using utf8), CONVERT(family using utf8), CONVERT(name using utf8), CONVERT(url using utf8) from wiki WHERE dbname = '{}'
     """.format(wiki_name))
 
     cursor.execute(query)
