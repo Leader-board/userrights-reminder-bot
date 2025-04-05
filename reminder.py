@@ -90,7 +90,7 @@ def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
         cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'{wiki_name}.analytics.db.svc.wikimedia.cloud',
                                       database=f'{wiki_name}_p', charset='utf8', use_unicode=True)
         query = """
-        SELECT ug.ug_user as userid, CONVERT(u.user_name USING utf8) as username, CONVERT(ug.ug_group USING utf8) as userright, ug.ug_expiry as expiry from user_groups ug
+        SELECT CONVERT(ug.ug_user using utf8) as userid, CONVERT(u.user_name USING utf8) as username, CONVERT(ug.ug_group USING utf8) as userright, ug.ug_expiry as expiry from user_groups ug
         INNER JOIN user u
         ON u.user_id = ug.ug_user
         WHERE ug_expiry is not null
@@ -100,7 +100,7 @@ def get_users_expiry(wiki_name, interval = 1, lower_bound = 25):
         cursor = cnx.cursor()
         cursor.execute(query)
         res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
-        print(res)
+        #print(res)
         vars.current_stream = vars.current_stream + res.to_string() + '\n'
         cursor.close()
         return res
@@ -377,7 +377,6 @@ def run_approved_wikis():
 
 
 def user_expiry_database_save(db):
-    print(db)
     r = json.dumps(db)
     # save that to db
     wiki_url = 'https://meta.wikimedia.org'
