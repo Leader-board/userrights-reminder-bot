@@ -14,7 +14,7 @@ import wikilist
 import traceback
 
 
-only_update_db = False
+only_update_db = True
 
 
 def get_url(wiki_name):
@@ -377,6 +377,7 @@ def run_approved_wikis():
 
 
 def user_expiry_database_save(db):
+    print(db)
     r = json.dumps(db)
     # save that to db
     wiki_url = 'https://meta.wikimedia.org'
