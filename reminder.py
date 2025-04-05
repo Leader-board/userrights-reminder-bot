@@ -241,6 +241,8 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     else:
         # get the list
         ll = local_database[wiki_name][user_expiry]
+        print(ll)
+        print(det)
         # reminder: [user_name, user_right]
         exists = False
         for det in ll:
