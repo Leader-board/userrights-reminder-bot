@@ -22,7 +22,7 @@ def get_url(wiki_name):
                                   database=f'meta_p', charset='utf8', use_unicode=True)
     cursor = cnx.cursor()
     query = ("""
-    SELECT CONVERT(dbname using utf8), CONVERT(lang using utf8), CONVERT(family using utf8), CONVERT(name using utf8), CONVERT(url using utf8) from wiki WHERE dbname = '{wiki_name}'
+    SELECT CONVERT(dbname using utf8) as dbname, CONVERT(lang using utf8) as lang, CONVERT(family using utf8) as family, CONVERT(name using utf8) as name, CONVERT(url using utf8) as url from wiki WHERE dbname = '{wiki_name}'
     """.format(wiki_name=wiki_name))
     cursor.execute(query)
     res = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
@@ -186,7 +186,7 @@ def load_meta_p(wiki_name):
                                   database='meta_p', charset='utf8', use_unicode=True)
     cursor = cnx.cursor()
     query = ("""
-    SELECT CONVERT(dbname using utf8), CONVERT(lang using utf8), CONVERT(family using utf8), CONVERT(name using utf8), CONVERT(url using utf8) from wiki WHERE dbname = '{}'
+    SELECT CONVERT(dbname using utf8) as dbname, CONVERT(lang using utf8) as lang, CONVERT(family using utf8) as family, CONVERT(name using utf8) as name, CONVERT(url using utf8) as url from wiki WHERE dbname = '{}'
     """.format(wiki_name))
 
     cursor.execute(query)
