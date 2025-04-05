@@ -242,7 +242,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
         # get the list
         ll = local_database[wiki_name][user_expiry]
         print(ll)
-        print(det)
+        print(f"{user_name} {user_right} {user_expiry} {user_id}")
         # reminder: [user_name, user_right]
         exists = False
         for det in ll:
