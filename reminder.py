@@ -34,7 +34,7 @@ def get_users_expiry_global(interval = 1, lower_bound = 25):
     cnx = mysql.connector.connect(option_files='replica.my.cnf', host=f'centralauth.analytics.db.svc.wikimedia.cloud',
                                   database=f'centralauth_p', charset='utf8', use_unicode=True)
     query = """
-    SELECT ug.gug_user as userid, CONVERT(u.gu_name using utf8) as username, CONVERT(ug.gug_group using utf8) as userright, CONVERT(ug.gug_expiry usint utf8) as expiry from global_user_groups ug
+    SELECT ug.gug_user as userid, CONVERT(u.gu_name using utf8) as username, CONVERT(ug.gug_group using utf8) as userright, CONVERT(ug.gug_expiry using utf8) as expiry from global_user_groups ug
     INNER JOIN globaluser u
     ON u.gu_id = ug.gug_user
     WHERE gug_expiry is not null
