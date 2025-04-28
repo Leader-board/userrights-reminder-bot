@@ -322,11 +322,19 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     else:
         # if $2 is not valid, assume it is $1
         title_to_send = title_to_send.replace("$2", get_wiki_usergroup(user_right, wiki_name) if get_wiki_usergroup(user_right, wiki_name) is not None else user_right)
+
+    # handling summaries
+
+    if local_exists and 'summary' in local_data:
+        summary = local_data['summary']
+    else:
+        summary = global_data['summary'] if 'summary' in global_data else ''
+
     # and then we can send!
     global only_update_db
  #   print(only_update_db)
     if not only_update_db:
-        status = inform_users(wiki_name, user_name, title_to_send, message_to_send)
+        status = inform_users(wiki_name, user_name, title_to_send, message_to_send, summary)
     else: # we should not send anything
         status = True
 
@@ -415,7 +423,7 @@ def send_messages(wiki_name):
     vars.central_log[wiki_name] = vars.current_stream
 
 
-def inform_users(wiki_name, user, title, message):
+def inform_users(wiki_name, user, title, message, summary = ''):
     # inform users that their user right will expire soon
     # find the user talk page
     if wiki_name != 'global':
@@ -432,7 +440,8 @@ def inform_users(wiki_name, user, title, message):
         "sectiontitle": title,
         "token": CSRF_TOKEN,
         "format": "json",
-        "appendtext": message
+        "appendtext": message,
+        "summary": summary
     }
     R = S.post(URL, data=PARAMS_3)
     DATA = R.json()
