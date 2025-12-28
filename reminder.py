@@ -282,7 +282,7 @@ def prepare_message(wiki_name, user_name, user_right, user_expiry, user_id):
     else:
         date_locale = global_data['default_date_locale']
 
-    if (wiki_name != 'global' and user_right in global_exclude) or (local_exists and (user_right in local_exclude)) or (
+    if (wiki_name != 'global' and user_right in global_exclude) or (local_exclude is not None and (user_right in local_exclude)) or (
             wiki_name == 'global' and user_right in global_rights_exclude):
         return  # do NOT proceed
     # then determine the base message to send
